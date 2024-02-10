@@ -1,23 +1,25 @@
 # Senior-Practicum
-A collection of my work on my senior practicum, continuing from the work I presented during summer research from 2022-2023 / 2023-2024
+A collection of my work on my senior practicum
 
 CSC-4081 Computer Applications Practicum I
 
-Project Proposal: Developments Into the Small Scale Implementation of Dr. Robbeloth's Obstruction Research Processor Services Branch
+Project Proposal: Development a reservation system for Thorne Library study rooms as MVNU
 Sam Riffle
 
 1. PURPOSE AND SCOPE 
 
-This system will be developed to allow a springboard for others when delving into further research when it comes to DNN based database systems and operations with datasets as it pertains to computer vision. The goal of this specific implementation is to construct a prototype implementation for experimental purposes, to be used by future SPUR sessions at MVNU.
+This system will be used to allow students to view and reserve available rooms for study at any given date in MVNU’s Thorne Library foremost, with a module to allow administrators to update the present schedule as rooms are closed or opened. Users will involve students, library staff, and additional maintenance staff, where the stakeholders include Tim Radcliff of MVNU and Travis Kennedy, also of MVNU staff. The goal of this project will be to deliver a minimally viable product for use with library reservations separate from the 3rd party application currently deployed. 
 
-3. FUNCTIONAL DESCRIPTION 
+2. FUNCTIONAL DESCRIPTION 
 
-<p>The top level user interactable framework will include a web page with options to export image sets to our CS server at MVNU, and include all command line arguments as selectable options and text boxes. A wiki will be provided to assist in its use.</p>
-<p>The HTF5 database itself will include storage options for raw image data imported from the user interactable framework (UIF), processed data from images that have gone through the preprocessor service.</p>
-<p>The backend will include a small scale implementation of Dr. Robbeloth't obstruction code in Java pertaining to all code necessary to implement a DNN matching schema on obstructed images. Modules of code will handle CLA's, preprocesing, storage/retrieval from the database, and matching. All command line options selected by the UIF will go through the CLA (command line argument) option module in order to trigger the correct sequence of operations between the remaining 3 backend modules, database, and UIF.</p>
+<p>The system will provide the ability to reserve a room for study at any given point within the school semester provided a fine of $5 is not present on a student account, as well as cancel a reservation. Input will include user selection of an available room, user selection of room configurations, the date and time a room will be reserved given in 30 minute reservation increments, and user ID for authentication. Output will include a confirmation submenu of room choice, room configuration, and datetime before authentication, then output of confirmation when a room is successfully reserved after confirmation (including an email ticket of the reservation). Interfaces will include a web page for reservation and a database storing dates and configurations available, and an API interface for authentication where the user will be redirected. </p>
+<p>The system will provide the ability for an administrator to add or remove available rooms for any given date(s), as well as add or remove room configuration options for any given room available on any given date(s). Additionally, it will provide administrators with the ability to mark rooms as in use and finished when room keys are issued and received at the front desk of Thorne Library, as well as reset fines when they are paid so rooms may once again be accessed. Inputs will include user selection of rooms (with room configurations) along with a date and time to add or remove respective to every option stated in accordance with a room or date. Inputs will additionally include an option for reservation key issuance and acceptance, as well as the option to input transactions put forth to resolve fines. Outputs will include confirmation of changes to a room or dates, as well as confirmation of fine correction and room activity at the current time when a key is issued. Interfaces will include a web page for administrator usage and a database storing dates and configurations available, and an API interface for authentication where the administrator will be redirected, since everyone needs to be authenticated to use the web page in a secure fashion. </p>
+<p>The system will autonomously issue $1 an hour fines for rooms not marked as finished from use, up to $5 in fines, as well as clear a reservation slot for a room that has not been marked as in use after 10 minutes have passed. There will be no input, but output will include an email notice to the student ID reserve of a room for tardiness to and from a study room. Interfaces will include a database for retrieving current reservation information, as well as an API to add fines to a user account and check fines, alongside an API to send email notifications to user accounts. </p>
+<p>The system will autonomously update and show available and reserved rooms with their configuration options for the current day on a monitor in Thorne Library according to the database status. Inputs will not be required by a user, while outputs will include information pertaining to reservations on the monitor. Interfaces will include a database for retrieving current reservation information. </p>
 
-5. CONSTRAINTS 
+3. CONSTRAINTS 
 
-<p>•	available resources: HTF5 is not covered in the database course at MVNU. At the time of this project proposal, Sam Riffle has just begun the database course: FA2023. There is no official course on machine learning or CUDA at MVNU, and as is such, all gpu and DNN work is subject to errors.</p>
-<p>•	required interfaces: A PHP framework falls in line with many MVNU webpages currently in service. HTF5 will serve as a framework to store images in a filesystem-esque structure, where there will be root > datasets > imagesets > images. DNN will be carried out on cuda.</p>
-<p>•	schedule requirements: The system should be available at the end of the SP23 semester. Any relevant constraints will be related to student availability and expertise. The FA23 schedule finds that the student courseload is at 17-18 credit hours. Time will be allotted to this practicum, but not at the expense of these credit hours.</p>
+<p>Available resources include faculty information on current similar systems implemented at MVNU including but not limited to The Rec’s reservation system and systems that use MVNU’s redirect page for authentication for students and faculty when signing onto campus intranet. </p>
+<p>External environmental factors that may affect usability include mentions of updating the current Thorne Library Website API within 1-2 years after this project is implemented, possibly rendering it obsolete. </p>
+<p>The system must interact with current authentication pages tied to MVNU’s domain to pass credentials around to handle student fines and email listings. 
+<p>The minimally viable system should be available by the end of the SP2024 semester</p>
