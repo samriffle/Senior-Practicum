@@ -321,22 +321,77 @@
             }
         }
 
-        function updateCalendar(direction) {
-            if (direction === 'next') {
-                currentMonth++;
-                if (currentMonth > 12) {
-                    currentMonth = 1;
-                    currentYear++;
-                }
-            } else if (direction === 'prev') {
-                currentMonth--;
-                if (currentMonth < 1) {
-                    currentMonth = 12;
-                    currentYear--;
-                }
-            }
+        function getDates() {
+            return new Promise((resolve, reject) => {
+                const url = 'get_available_dates.php';
 
-            populateCalendar(currentYear, currentMonth);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching date data:', error);
+                        reject(error);
+                    });
+            });
+        }
+
+        async function updateCalendar(direction) {
+            // Fetch the minimum and maximum dates available
+            const url = 'get_available_dates.php';
+            try {
+                getDates()
+                    .then(data => {
+                        const minDateStr = data.mindate;
+                        const maxDateStr = data.maxdate;
+
+                        const [minYear, minMonth] = minDateStr.split('-');
+                        const [maxYear, maxMonth] = maxDateStr.split('-');
+
+                        simYearUpdate = currentYear;
+                        simMonthUpdate = currentMonth;
+
+                       if (direction === 'next') {
+                            simMonthUpdate++;
+                            if (simMonthUpdate > 12) {
+                                simMonthUpdate = 1;
+                                simYearUpdate++;
+                            }
+                        } else if (direction === 'prev') {
+                            simMonthUpdate--;
+                            if (simMonthUpdate < 1) {
+                                simMonthUpdate = 12;
+                                simYearUpdate--;
+                            }
+                        }
+
+                        // make 3 dates to check sim vs max/min dates
+                        simDate = new Date(simYearUpdate, simMonthUpdate - 1);
+                        maxDate = new Date(maxYear, maxMonth - 1);
+                        minDate = new Date(minYear, minMonth - 1);
+
+                        if (direction === 'next' && simDate <= maxDate) {
+                            currentMonth++;
+                            if (currentMonth > 12) {
+                                currentMonth = 1;
+                                currentYear++;
+                            }
+                        } else if (direction === 'prev' && simDate >= minDate) {
+                            currentMonth--;
+                            if (currentMonth < 1) {
+                                currentMonth = 12;
+                                currentYear--;
+                            }
+                        }
+
+                        populateCalendar(currentYear, currentMonth);
+                    });
+            } catch (error) {
+                console.error('Error fetching or processing available dates:', error);
+                // Handle error
+            }
         }
 
         document.getElementById('cancel-reservation').addEventListener('click', function () {
