@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Bookings</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column; /* Stack items vertically */
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed; /* Fix table layout */
+            border: 1px solid #ddd;
+            white-space: nowrap; /* Prevent wrapping */
+            overflow-x: auto; /* Enable horizontal scrolling */
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            width: 150px; /* Fixed width for each cell */
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .bookings-list {
+            max-height: 100px; /* Maximum height of the list */
+            overflow: auto; /* Enable scrolling */
+        }
+
+        .label {
+            margin-bottom: 10px; /* Add space between label and table */
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="label">Bookings</h1>
+    <table id="bookingTable">
+        <thead>
+            <tr>
+                <th>Room</th>
+                <th>Bookings</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        async function loadBookings() {
+            const response = await fetch('search_availabilities.php');
+            const data = await response.json();
+            console.log(data);
+
+            const tableBody = document.querySelector('#bookingTable tbody');
+            tableBody.innerHTML = ''; // Clear table body
+
+            const roomRows = {};
+
+            data.forEach(availability => {
+                const room = availability.room;
+                const dateTime = new Date(`${availability.date}T${availability.timeslot}`);
+                const roomOptions = availability.room_options.map(option => option.option_name).join(', ');
+
+                if (!roomRows[room]) {
+                    roomRows[room] = document.createElement('tr');
+                    const roomCell = document.createElement('td');
+                    roomCell.textContent = room;
+                    roomRows[room].appendChild(roomCell);
+
+                    const bookingsCell = document.createElement('td');
+                    const bookingsList = document.createElement('div');
+                    bookingsList.classList.add('bookings-list');
+                    bookingsCell.appendChild(bookingsList);
+                    roomRows[room].appendChild(bookingsCell);
+
+                    roomRows[room].bookings = [];
+                }
+
+                roomRows[room].bookings.push({ dateTime, roomOptions });
+            });
+
+            // Sort bookings by date and time
+            Object.keys(roomRows).forEach(room => {
+                roomRows[room].bookings.sort((a, b) => a.dateTime - b.dateTime);
+            });
+
+            // Sort room rows by room name
+            const sortedRooms = Object.keys(roomRows).sort();
+
+            // Add sorted bookings to the table
+            sortedRooms.forEach(room => {
+                const bookingsCell = roomRows[room].lastChild.firstChild;
+                roomRows[room].bookings.forEach(booking => {
+                    const bookingCell = document.createElement('div');
+                    bookingCell.textContent = `${booking.dateTime.toLocaleString()} (${booking.roomOptions})`;
+                    bookingsCell.appendChild(bookingCell);
+                });
+            });
+
+            // Add all room rows to the table
+            sortedRooms.forEach(room => {
+                tableBody.appendChild(roomRows[room]);
+            });
+        }
+
+        loadBookings();
+        setInterval(loadBookings, 10000); // Refresh every 10 seconds
+    </script>
+</body>
+
+</html>

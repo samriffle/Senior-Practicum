@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building an Accessible Calendar of Events in HTML, CSS, and JavaScript</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        td:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Add more styles as needed */
+        .overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+        }
+
+        .overlay table {
+            width: 100%;
+        }
+
+        .overlay table td {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .timeslots {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .date-cell {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <caption>Event Calendar</caption>
+        <thead>
+            <tr>
+                <th scope="col">Sunday</th>
+                <th scope="col">Monday</th>
+                <th scope="col">Tuesday</th>
+                <th scope="col">Wednesday</th>
+                <th scope="col">Thursday</th>
+                <th scope="col">Friday</th>
+                <th scope="col">Saturday</th>
+            </tr>
+        </thead>
+        <tbody id="calendar-body">
+            <!-- Calendar cells for days and weeks will be populated here -->
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"><button id="prev-month">Previous Month</button></td>
+                <td colspan="4" id="month-year"></td>
+                <td colspan="3"><button id="next-month">Next Month</button></td>
+            </tr>
+        </tfoot>
+    </table>
+    <button id="cancel-reservation">Cancel Reservation</button>
+    <script>
+        let activeOverlay = null;
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+
+        // Time format function to match database timeslot output
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+        }
+
+        // Special function to check timeslot availability with json object data
+        function isTimeslotAvailable(timeslot, data) {
+            const timeslotToCheck = formatTime(timeslot);
+
+            // Loop through the data array
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].timeslot === timeslotToCheck) {
+                    // Found the timeslot, get the is_available value
+                    const isAvailable = data[i].is_available;
+                    console.log(`Timeslot ${timeslotToCheck} is available: ${isAvailable}`);
+                    return isAvailable;
+                }
+            }
+            result = data.some(item => item.timeslot === formatTime(timeslot) && item.is_available);
+            return result;
+        }
+
+        function fetchTimeslotAvailability(date, room) {
+            return new Promise((resolve, reject) => {
+                const formattedDate = date.toISOString().slice(0, 10); // Format date as YYYY-MM-DD
+                const url = `get_availability.php?date=${formattedDate}&room=${room}`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching availability data:', error);
+                        reject(error);
+                    });
+            });
+        }
+
+        // Must host on a www server to enable GET with full permissions within the browser
+        function fetchAvailableRooms(date) {
+            return new Promise((resolve, reject) => {
+                const formattedDate = date.toISOString().slice(0, 10); // Format date as YYYY-MM-DD
+                const url = `get_rooms.php?date=${formattedDate}`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(rooms => {
+                        console.log(rooms);
+                        resolve(rooms);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching availability data:', error);
+                        reject(error);
+                    });
+            });
+        }
+
+        async function isBlocked(room, date, timeCell) {
+            const timeslot = formatTime(timeCell);
+            const formattedDate = date.toISOString().slice(0, 10); // Format date as YYYY-MM-DD
+            const url = `../admin/check_availability.php?room=${room}&date=${formattedDate}&timeslot=${timeslot}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log("Blocked: ", data.is_blocked); // Log the value of is_blocked
+                return data.is_blocked === true; // Check if is_blocked is true
+            } catch (error) {
+                console.error('Error:', error);
+                return false; // Assuming error means not blocked
+            }
+        }
+
+        async function checkBlockStatus(room, date, timeCell) {
+            const blockStatus = await isBlocked(room, date, timeCell);
+            console.log(blockStatus);
+            return blockStatus;
+        }
+
+        async function createOverlay(year, month, day, dayOfWeek) {
+            const overlay = document.createElement('div');
+            overlay.classList.add('overlay');
+
+            const table = document.createElement('table');
+
+            // Fetch available rooms for the selected date
+            const date = new Date(year, month, day);
+            try {
+                const rooms = await fetchAvailableRooms(date);
+                rooms.forEach(room => {
+                    const roomRow = document.createElement('tr');
+                    const roomCell = document.createElement('td');
+                    roomCell.textContent = room;
+                    roomCell.style.cursor = 'pointer';
+                    roomCell.style.backgroundColor = '#f0f0f0'; // Grey background
+                    roomCell.style.border = '1px solid #ccc'; // Black border
+                    roomCell.addEventListener('click', function () {
+                        // Fetch timeslots available for this room on the selected date
+                        fetchTimeslotAvailability(date, room)
+                            .then(data => {
+                                // Display timeslots
+                                table.innerHTML = ''; // Clear existing table
+
+                                const timeslots = document.createElement('div');
+                                timeslots.classList.add('timeslots');
+                                timeslots.style.minWidth = '80px'; // Set a minimum width, adjust as needed
+                                for (let i = 7.5; i <= 23; i += 0.5) {
+                                    const row = document.createElement('tr');
+                                    row.classList.add('timeslot-row');
+                                    const timeCell = document.createElement('td');
+                                    timeCell.style.cursor = 'pointer';
+                                    timeCell.style.backgroundColor = '#f0f0f0'; // Grey background
+                                    timeCell.style.border = '1px solid #ccc'; // Black border
+                                    timeCell.style.minWidth = '50px'; // Set a minimum width, adjust as needed
+                                    timeCell.textContent = `${Math.floor(i)}:${(i % 1 === 0.5) ? '30' : '00'}`;
+
+                                    // Check if timeslot falls within operating hours
+                                    if (!isOperatingHours(dayOfWeek, i) || !isTimeslotAvailable(timeCell.textContent, data)) {
+                                        row.classList.add('inactive');
+                                        row.style.backgroundColor = 'f0f0f0';
+                                        row.style.color = '#888';
+                                    } else {
+                                        // Check if timeslot is blocked
+                                        checkBlockStatus(room, date, timeCell.textContent).then(blocked => {
+                                            if (blocked) {
+                                                row.classList.add('inactive');
+                                                row.style.backgroundColor = 'f0f0f0';
+                                                row.style.color = '#888';
+                                            }
+                                            else {
+                                                // Add click event listener to redirect to book.html
+                                                row.addEventListener('click', function () {
+                                                    const timeslot = formatTime(timeCell.textContent);
+                                                    const url = `book.html?date=${date.toISOString().slice(0, 10)}&room=${room}&timeslot=${timeslot}`;
+                                                    window.location.href = url;
+                                                });
+                                            }
+                                        });
+                                    }
+
+                                    row.appendChild(timeCell);
+                                    timeslots.appendChild(row);
+                                }
+                                // Add a row for the day of the week
+                                const dayOfWeekRow = document.createElement('tr');
+                                const dayOfWeekCell = document.createElement('td');
+                                dayOfWeekCell.colSpan = 1; // Span the entire row
+                                dayOfWeekCell.textContent = date.toDateString();
+                                dayOfWeekRow.appendChild(dayOfWeekCell);
+                                table.appendChild(dayOfWeekRow);
+
+                                table.appendChild(timeslots);
+                            })
+                            .catch(error => {
+                                console.error('Error fetching timeslot availability:', error);
+                                table.textContent = 'Error fetching timeslot availability. Please try again.';
+                            });
+                    });
+                    roomRow.appendChild(roomCell);
+                    table.appendChild(roomRow);
+                });
+
+                overlay.appendChild(table);
+                document.body.appendChild(overlay);
+                activeOverlay = overlay;
+            } catch (error) {
+                console.error('Error creating overlay:', error);
+                overlay.textContent = 'Error creating overlay. Please try again.';
+            }
+        }
+
+        function isOperatingHours(dayOfWeek, hour) {
+            switch (dayOfWeek) {
+                case 'Sunday':
+                    return hour >= 15 && hour < 23;
+                case 'Monday': case 'Tuesday': case 'Wednesday': case 'Thursday':
+                    return hour >= 7.5 && hour < 23;
+                case 'Friday':
+                    return hour >= 7.5 && hour < 20;
+                case 'Saturday':
+                    return hour >= 10 && hour < 18;
+                default:
+                    return false;
+            }
+        }
+
+        function populateCalendar(year, month) {
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const firstDayOfMonth = new Date(year, month - 1, 1).getDay();
+            gapDays = 0;
+
+            const calendarBody = document.getElementById('calendar-body');
+            const monthYearCell = document.getElementById('month-year');
+            calendarBody.innerHTML = '';
+            monthYearCell.textContent = `${new Date(year, month - 1).toLocaleString('default', { month: 'long' })} ${year}`;
+
+            let date = 1;
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < 7; j++) {
+                    const cell = document.createElement('td');
+                    if (i === 0 && j < firstDayOfMonth) {
+                        const emptyCell = document.createTextNode('');
+                        cell.appendChild(emptyCell);
+                        gapDays++;
+                    }
+                    else if (date > daysInMonth) {
+                        break;
+                    }
+                    else {
+                        const dayOfWeek = j === 0 ? 'Sunday' :
+                            j === 1 ? 'Monday' :
+                                j === 2 ? 'Tuesday' :
+                                    j === 3 ? 'Wednesday' :
+                                        j === 4 ? 'Thursday' :
+                                            j === 5 ? 'Friday' : 'Saturday';
+                        cell.addEventListener('click', function () {
+                            createOverlay(year, month - 1, ((i * 7) + j) - gapDays + 1, dayOfWeek);
+                        });
+                        cell.textContent = date;
+                        date++;
+                    }
+                    row.appendChild(cell);
+                }
+                calendarBody.appendChild(row);
+            }
+        }
+
+        function updateCalendar(direction) {
+            if (direction === 'next') {
+                currentMonth++;
+                if (currentMonth > 12) {
+                    currentMonth = 1;
+                    currentYear++;
+                }
+            } else if (direction === 'prev') {
+                currentMonth--;
+                if (currentMonth < 1) {
+                    currentMonth = 12;
+                    currentYear--;
+                }
+            }
+
+            populateCalendar(currentYear, currentMonth);
+        }
+
+        document.getElementById('cancel-reservation').addEventListener('click', function () {
+            window.location.href = 'cancel.html'; // Redirect to cancel.html
+        });
+
+        document.getElementById('prev-month').addEventListener('click', function () {
+            updateCalendar('prev');
+        });
+
+        document.getElementById('next-month').addEventListener('click', function () {
+            updateCalendar('next');
+        });
+
+        document.addEventListener('click', function (event) {
+            if (activeOverlay && !activeOverlay.contains(event.target)) {
+                document.body.removeChild(activeOverlay);
+                activeOverlay = null;
+            }
+        });
+
+        // Initial population of the calendar
+        populateCalendar(currentYear, currentMonth);
+    </script>
+</body>
+</html>

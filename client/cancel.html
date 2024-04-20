@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Options</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .options-container {
+            max-width: 600px;
+            width: 100%;
+            overflow-y: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="options-container" id="reservationsContainer">
+        <table id="reservationsTable">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Room</th>
+                    <th>Date</th>
+                    <th>Timeslot</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Reservations will be dynamically inserted here -->
+            </tbody>
+        </table>
+        <button onclick="processTransaction()">Submit Selection</button>
+    </div>
+    <script>
+        function fetchReservations(studentId) {
+            return new Promise((resolve, reject) => {
+                const url = `get_bookings.php?studentId=${studentId}`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(reservations => {
+                        console.log(reservations);
+                        resolve(reservations);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching reservation data:', error);
+                        reject(error);
+                    });
+            });
+        }
+
+        async function init() {
+            // authenticate on index.html and return to this page with studentId tag added to url
+            const { studentId } = getIdFromUrl();
+            if (studentId === null) {
+                // Student ID not found, redirect to authentication first
+                console.log("No ID found, redirecting to authentication to retrieve it.");
+                window.location.href = `../auth/index.html?cancelReq=true`;
+                return;
+            } else if (studentId === -1) {
+                console.log("Error finding ID");
+                alert('Authentication failed');
+                return;
+            } else if (typeof studentId === 'string' && studentId.length === 7) {
+                // Move on everything is fine
+            }
+            else {
+                console.log("Id check failed : [");
+                return;
+            }
+
+            // Student ID received from auth, now we call a function to call a PHP file to get student reservations made from availabilities
+            fetchReservations(studentId)
+                .then(reservations => {
+                    reservations.forEach(reservation => {
+                        // Add each room option to the optionsTable
+                        const row = reservationsTable.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell2 = row.insertCell(1);
+                        const cell3 = row.insertCell(2);
+                        const cell4 = row.insertCell(3);
+
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'reservation';
+                        checkbox.value = `${reservation.room},${reservation.date},${reservation.timeslot}`;
+                        checkbox.id = `${reservation.room},${reservation.date},${reservation.timeslot}`;
+
+                        cell1.appendChild(checkbox);
+                        cell2.textContent = reservation.room;
+                        cell3.textContent = reservation.date;
+                        cell4.textContent = reservation.timeslot;
+                    });
+                });
+
+            // init done, now set up the submitSelection button on the bottom of the checklist and have it trigger processTransaction() for
+        }
+
+        async function processTransaction() {
+            console.log("Processing Transaction");
+            const selectedOptions = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value.split(','));
+            const { studentId } = getIdFromUrl();
+
+            selectedOptions.forEach(async (option) => {
+                const [room, date, timeslot] = option;
+                const formData = new FormData();
+                formData.append('studentId', studentId);
+                formData.append('date', date);
+                formData.append('room', room);
+                formData.append('timeslot', timeslot);
+
+                console.log("Outsourcing Transaction for: ", room, date, timeslot);
+                const response = await fetch('remove_booking.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    console.log("Transaction processed successfully for: ", room, date, timeslot);
+                    alert('Transaction processed successfully.');
+                    window.location.href = 'calendar.html';
+                } else {
+                    console.error('Failed to process transaction for: ', room, date, timeslot);
+                    alert('Transaction failed.');
+                    window.location.href = 'calendar.html';
+                }
+            });
+
+            // Redirect to index.html or any other page after all transactions are processed
+            window.location.href = 'calendar.html';
+        }
+
+        // Function to parse URL parameters
+        function getIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('studentId');
+            return { studentId };
+        }
+
+        init();
+    </script>
+</body>
+</html>

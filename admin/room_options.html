@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Options</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        select, input[type="text"], button {
+            margin-top: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 50%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Room Options</h1>
+    <label for="room-select">Select Room:</label>
+    <select id="room-select" onchange="getRoomOptions()">
+        <!-- Options will be dynamically populated -->
+    </select>
+
+    <div>
+        <table id="options-table">
+            <thead>
+                <tr>
+                    <th>Option</th>
+                    <th>Select</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table rows will be dynamically populated -->
+            </tbody>
+        </table>
+
+        <!-- Remove Options Button -->
+        <button onclick="removeOptions()">Remove Selected Options</button>
+    </div>
+
+    <div>
+        <label for="new-option">Add New Room Option Name:</label>
+        <input type="text" id="new-option">
+        <button onclick="addOption()">Add Option</button>
+    </div>
+
+    <div>
+        <label for="stock-input">Input Stock For Checked Items:</label>
+        <input type="text" id="stock-input">
+        <button onclick="updateStock()">Update Stock</button>
+    </div>
+
+    <script>
+        async function populateRooms() {
+            const response = await fetch('get_roomList.php?keySearch=all');
+            const data = await response.json();
+            data.sort((a, b) => a.room.localeCompare(b.room)); // Sort the data alphabetically
+            const select = document.getElementById('room-select');
+            data.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.room;
+                option.textContent = room.room;
+                select.appendChild(option);
+            });
+            getRoomOptions(); // Populate the initial room options
+        }
+
+        async function getRoomOptions() {
+            const room = document.getElementById('room-select').value;
+            const response = await fetch(`get_roomOptions.php?room=${room}`);
+            const data = await response.json();
+            const table = document.getElementById('options-table');
+            table.innerHTML = ''; // Clear existing table
+
+            data.forEach(option => {
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2); // New cell for stock
+                cell1.textContent = option.option_name;
+                cell2.innerHTML = `<input type="checkbox" name="option" value="${option.option_name}">`;
+                cell3.textContent = option.stock; // Display stock value
+            });
+        }
+
+        async function removeOptions() {
+            const room = document.getElementById('room-select').value;
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const options = Array.from(checkboxes).map(checkbox => checkbox.value);
+            const response = await fetch(`remove_roomOptions.php?room=${room}&options=${options.join(',')}`);
+            const result = await response.text();
+            alert(result);
+            getRoomOptions(); // Refresh the room options after removal
+        }
+
+        async function addOption() {
+            const room = document.getElementById('room-select').value;
+            const newOption = document.getElementById('new-option').value;
+            const response = await fetch(`add_roomOptions.php?room=${room}&option=${newOption}`);
+            const result = await response.text();
+            alert(result);
+            getRoomOptions(); // Refresh the room options after addition
+        }
+
+        async function updateStock() {
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const options = Array.from(checkboxes).map(checkbox => checkbox.value);
+            const newStock = document.getElementById('stock-input').value;
+
+            const response = await fetch(`update_stock.php?options=${options.join(',')}&stock=${newStock}`);
+            const result = await response.text();
+            alert(result);
+            getRoomOptions(); // Refresh the room options after stock update
+        }
+
+        populateRooms();
+    </script>
+</body>
+</html>
+

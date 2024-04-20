@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keys currently issued</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .form-row {
+            display: block;
+            margin-top: 10px; /* Adjust as needed for spacing */
+        }
+
+            .form-row select {
+                margin-right: 10px;
+                padding: 8px;
+                border: 1px solid #ddd;
+            }
+
+            .form-row button {
+                padding: 8px 16px;
+                border: none;
+                background-color: #808080;
+                color: white;
+                cursor: pointer;
+            }
+
+        .line-break {
+            clear: both;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Room Key</th>
+                    <th>Issued</th>
+                </tr>
+            </thead>
+            <tbody id="key-status"></tbody>
+        </table>
+
+        <div>
+            <div class="form-row">
+                <select id="issue-room-select">
+                    <!-- Options will be dynamically populated -->
+                </select>
+                <button onclick="issueKey()">Issue Key</button>
+                <select id="return-room-select">
+                    <!-- Options will be dynamically populated -->
+                </select>
+                <button onclick="returnKey()">Return Key</button>
+            </div>
+
+            <!-- New row for additional buttons -->
+            <div class="form-row line-break">
+                <button id="reset-fines">Reset Fines</button>
+                <button id="edit-room-options">Edit Available Room Options</button>
+                <button id="edit-dates">Edit Available Dates</button>
+            </div>
+
+            <div class="form-row line-break">
+                <button id="show-bookings-options">Show Upcoming Bookings and Options</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function init() {
+            // authenticate on index.html and return to this page with studentId tag added to url
+            const { studentId } = getIdFromUrl();
+            if (studentId === null) {
+                // Student ID not found, redirect to authentication first
+                console.log("No ID found, redirecting to authentication to retrieve it.");
+                window.location.href = `../auth/index.html?adminLogin=true`;
+                return;
+            } else if (studentId === -1) {
+                console.log("Error finding ID");
+                alert('Authentication failed');
+                return;
+            } else if (typeof studentId === 'string' && studentId.length === 7) {
+                // Move on everything is fine
+            }
+            else {
+                console.log("Id check failed : [");
+                return;
+            }
+            // Init done and admin user has been authenticated
+        }
+
+        function fetchAndDisplayKeyStatus() {
+            fetch('get_keyStatus.php')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('key-status');
+                    tableBody.innerHTML = ''; // Clear existing rows
+
+                    if (data.length === 0) {
+                        const noKeysRow = document.createElement('tr');
+                        const noKeysCell = document.createElement('td');
+                        noKeysCell.textContent = 'No keys issued';
+                        noKeysCell.colSpan = 2;
+                        noKeysRow.appendChild(noKeysCell);
+                        tableBody.appendChild(noKeysRow);
+                    } else {
+                        data.forEach(item => {
+                            const row = document.createElement('tr');
+                            const roomCell = document.createElement('td');
+                            roomCell.textContent = item.room;
+                            const options = { timeZone: 'America/New_York'};
+                            const issueTimeUtc = new Date(item.issue_time);
+                            const issueTime = new Date(issueTimeUtc.setHours(issueTimeUtc.getHours() + 4));
+                            const timeslotCell = document.createElement('td');
+                            timeslotCell.textContent = `${issueTime.toLocaleString()}`; // Format issue_time as a readable date/time string
+                            row.appendChild(roomCell);
+                            row.appendChild(timeslotCell);
+                            tableBody.appendChild(row);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching key status:', error);
+                    const tableBody = document.getElementById('key-status');
+                    tableBody.innerHTML = ''; // Clear existing rows
+                    const errorRow = document.createElement('tr');
+                    const errorCell = document.createElement('td');
+                    errorCell.textContent = 'Error fetching key status. Please try again later.';
+                    errorCell.colSpan = 2;
+                    errorRow.appendChild(errorCell);
+                    tableBody.appendChild(errorRow);
+                });
+        }
+
+        // Function to fetch room list and populate select elements
+        function populateRoomSelect(selectId, keySearch) {
+            fetch(`get_roomList.php?keySearch=${keySearch}`)
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = ''; // Clear existing options
+
+                    // Sort the data array alphabetically by the 'room' property
+                    data.sort((a, b) => a.room.localeCompare(b.room));
+
+                    data.forEach(room => {
+                        const option = document.createElement('option');
+                        option.value = room.room; // Assuming 'room' is the property name
+                        option.textContent = room.room;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error(`Error fetching room list for keySearch=${keySearch}:`, error);
+                });
+        }
+
+        // Function to issue a key
+        function issueKey() {
+            const room = document.getElementById('issue-room-select').value;
+            fetch(`issue_key.php?room=${room}`)
+                .then(response => response.text())
+                .then(result => {
+                    alert(result);
+                    // Repopulate 'issue-room-select' with keySearch=true after issuing the key
+                    populateRoomSelect('issue-room-select', 'true');
+                    populateRoomSelect('return-room-select', 'false');
+                    fetchAndDisplayKeyStatus();
+                })
+                .catch(error => {
+                    console.error('Error issuing key:', error);
+                    alert('Failed to issue key. Please try again.');
+                });
+        }
+
+        // Function to return a key
+        function returnKey() {
+            const room = document.getElementById('return-room-select').value;
+            fetch(`return_key.php?room=${room}`)
+                .then(response => response.text())
+                .then(result => {
+                    alert(result);
+                    // Repopulate 'return-room-select' with keySearch=false after returning the key
+                    populateRoomSelect('issue-room-select', 'true');
+                    populateRoomSelect('return-room-select', 'false');
+                    fetchAndDisplayKeyStatus();
+                })
+                .catch(error => {
+                    console.error('Error returning key:', error);
+                    alert('Failed to return key. Please try again.');
+                });
+        }
+
+        // Function to parse URL parameters
+        function getIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('studentId');
+            return { studentId };
+        }
+
+        // First load auth the administrator account
+        init();
+
+        // Initial call to populate page elements
+        fetchAndDisplayKeyStatus();
+        populateRoomSelect('issue-room-select', 'true');
+        populateRoomSelect('return-room-select', 'false');
+
+        // Call fetchAndDisplayKeyStatus() every 10 seconds to give the ilooshun of real time updates
+        setInterval(fetchAndDisplayKeyStatus, 10000);
+
+        // Call populateRoomSelect('issue-room-select', 'true') every 10 seconds
+        setInterval(() => {
+            populateRoomSelect('issue-room-select', 'true');
+        }, 10000);
+
+        // Call populateRoomSelect('return-room-select', 'false') every 10 seconds
+        setInterval(() => {
+            populateRoomSelect('return-room-select', 'false');
+        }, 10000);
+
+        document.getElementById('reset-fines').addEventListener('click', function () {
+            window.location.href = 'fine_review.html'; // Redirect to cancel.html
+        });
+
+        document.getElementById('edit-room-options').addEventListener('click', function () {
+            window.location.href = 'room_options.html'; // Redirect to cancel.html
+        });
+
+        document.getElementById('edit-dates').addEventListener('click', function () {
+            window.location.href = 'room_block.html'; // Redirect to cancel.html
+        });
+
+        document.getElementById('show-bookings-options').addEventListener('click', function () {
+            window.location.href = 'upcoming_bookings_options.html'; // Redirect to upcoming_bookings.html
+        });
+        
+    </script>
+</body>
+</html>

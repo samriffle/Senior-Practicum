@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fine Review</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        select, input[type="number"], button {
+            margin-top: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #fine-value {
+            display: inline-block;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fine Review</h1>
+        <label for="student-id">Select Student ID:</label>
+        <select id="student-id" onchange="getFineValue()">
+            <!-- Options will be dynamically populated -->
+        </select>
+        <div id="fine-value"></div>
+        <label for="new-fine">New Fine Value (0-5):</label>
+        <input type="number" id="new-fine" min="0" max="5">
+        <button onclick="updateFine()">Submit New Fine</button>
+        <button onclick="resetFine()">Reset Fine</button>
+    </div>
+
+    <script>
+        async function populateStudentIds() {
+            const response = await fetch('get_studentIds.php');
+            const data = await response.json();
+            const select = document.getElementById('student-id');
+            data.sort((a, b) => a.sid.localeCompare(b.sid)); // Sort student IDs alphanumerically
+            data.forEach(studentId => {
+                const option = document.createElement('option');
+                option.value = studentId.sid;
+                option.textContent = studentId.sid;
+                select.appendChild(option);
+            });
+            getFineValue(); // Populate the initial fine value
+        }
+
+        async function getFineValue() {
+            const studentId = document.getElementById('student-id').value;
+            const response = await fetch(`get_fineValue.php?sid=${studentId}`);
+            const data = await response.json();
+            document.getElementById('fine-value').textContent = `Current Fine: ${data.fine}`;
+        }
+
+        async function updateFine() {
+            const studentId = document.getElementById('student-id').value;
+            const newFine = document.getElementById('new-fine').value;
+            const response = await fetch(`update_fine.php?sid=${studentId}&fine=${newFine}`);
+            const result = await response.text();
+            alert(result);
+            getFineValue(); // Refresh the fine value after update
+        }
+
+        async function resetFine() {
+            const studentId = document.getElementById('student-id').value;
+            const response = await fetch(`reset_fine.php?sid=${studentId}`);
+            const result = await response.text();
+            alert(result);
+            getFineValue(); // Refresh the fine value after reset
+        }
+
+        populateStudentIds();
+    </script>
+</body>
+</html>

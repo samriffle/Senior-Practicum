@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authentication</title>
+</head>
+<body>
+    <form id="authForm">
+        <label for="studentId">Student ID:</label>
+        <input type="text" id="studentId" name="studentId">
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('authForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const studentId = document.getElementById('studentId').value;
+            const params = new URLSearchParams(window.location.search);
+
+            if (params.has('cancelReq')) {
+                // Redirect to cancel.html with the student ID
+                window.location.href = `../client/cancel.html?studentId=${studentId}`;
+            }
+            else if (params.has('adminLogin')) { // Will need to check that studentId is a registered admin here later 
+                // Redirect to room_status since admin is authenticated
+                window.location.href = `../admin/room_status.html?studentId=${studentId}`;
+            } else {
+                // Simulate authentication (replace with actual authentication logic)
+                const isAuthenticated = studentId !== '-1';
+
+                if (isAuthenticated) {
+                    const date = params.get('date');
+                    const room = params.get('room');
+                    const timeslot = params.get('timeslot');
+                    const options = params.get('options');
+
+                    // Redirect back to book.html with the student ID
+                    window.location.href = `../client/book.html?date=${date}&room=${room}&timeslot=${timeslot}&options=${options}&studentId=${studentId}`;
+                } else {
+                    alert('Authentication failed. Please try again.');
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
