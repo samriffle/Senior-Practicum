@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slide Show</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #slide {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <img id="slide" src="../../../../slide_1.png" alt="Slide">
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 3;
+
+        setInterval(() => {
+            currentSlide = (currentSlide % totalSlides) + 1;
+            document.getElementById('slide').src = `../../../../slide_${currentSlide}.png`;
+        }, 10000); // Change slide every 5 seconds
+    </script>
+</body>
+</html>
