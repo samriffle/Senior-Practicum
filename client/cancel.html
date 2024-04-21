@@ -55,7 +55,7 @@
                 <!-- Reservations will be dynamically inserted here -->
             </tbody>
         </table>
-        <button onclick="processTransaction()">Submit Selection</button>
+        <button onclick="processTransaction()">Cancel Selected Reservations</button>
     </div>
     <script>
         function fetchReservations(studentId) {
@@ -92,6 +92,8 @@
             }
             else {
                 console.log("Id check failed : [");
+                alert("Invalid student id. Please input a valid student id.");
+                window.location.href = `../auth/index.html?cancelReq=true`;
                 return;
             }
 
