@@ -29,11 +29,16 @@ This system will be used to allow students to view and reserve available rooms f
 <p>  Ensure that postgres, php, and python have been installed , setup, and updated along with the necessary python packages (pillow, python-pptx, datetime, psycopg2)
 <p>  ex) pip show [package] </p>
 <p>  ex) pip install pillow python-pptx datetime psycopg2</p>
-<p>  Download the entire project into your empty directory of choice. </p>
-<p>  Start a php server instance pointing to that directory where this project is downloaded to.</p>
+<p>  1. Download the entire project into your empty directory of choice. </p>
+<p>  2. Start a php server instance pointing to that directory where this project is downloaded to.</p>
 <p>  ex)  php -S [yourip]:[yourport] -t [C:\path\to\directory].</p>
-<p>  Open a terminal instance and navigate to the root directory of this project.</p>
-<p>  Edit db_config.php with your desired postgres database credentials.</p>
-<p>  Navigate to server\x64\Release in the  project and edit the postgres credentials in lines 16-20 of create_slide1.py.</p>
-<p>  Navigate back to the root of the project tree and run each shell file in numerical ordering of their names.</p>
-<p>  Open an html in your browser to confirm that the project is working.</p>
+<p>  3. Open a terminal instance and navigate to the root directory of this project.</p>
+<p>  4. Edit db_config.php with your desired postgres database credentials.</p>
+<p>  5. Navigate to server\x64\Release in the  project and edit the postgres credentials in lines 16-20 of create_slide1.py.</p>
+<p>  6. Navigate back to the root of the project tree and run each shell file in numerical ordering of their names.</p>
+<p>  7. Open an html in your browser to confirm that the project is working.</p>
+
+5. Additional Setup Before Step 6
+
+<p>  Navigate to the auth directory and add new id's with passwords to adminids.csv</p>
+<p>  Navigate to the database directory and edit daterange.txt and rooms.txt to specify the range of dates the calendar will cover and what rooms are available.</p>
