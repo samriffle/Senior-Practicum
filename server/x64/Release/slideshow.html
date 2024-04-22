@@ -16,17 +16,18 @@
             margin: auto;
         }
     </style>
+    <meta http-equiv="refresh" content="30"> <!-- Refresh the page every 10 seconds -->
 </head>
 <body>
-    <img id="slide" src="../../../../slide_1.png" alt="Slide">
+    <img id="slide" src="../../../slide_1.png" alt="Slide">
     <script>
         let currentSlide = 1;
         const totalSlides = 3;
 
         setInterval(() => {
             currentSlide = (currentSlide % totalSlides) + 1;
-            document.getElementById('slide').src = `../../../../slide_${currentSlide}.png`;
-        }, 10000); // Change slide every 5 seconds
+            document.getElementById('slide').src = `../../../slide_${currentSlide}.png`;
+        }, 10000); // Change slide every 10 seconds
     </script>
 </body>
 </html>
