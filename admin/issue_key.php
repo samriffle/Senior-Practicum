@@ -37,6 +37,20 @@ if (isset($_GET['room'])) {
         } else {
             echo "Failed to issue key for room $room.";
         }
+
+        // Set stock -1 for being in use for selected options for the room date and timeslot
+        $stmt = $pdo->prepare('SELECT option_name, option_selected FROM room_options WHERE room = :room AND date = :date AND timeslot = :timeslot');
+        $stmt->execute([':room' => $room, ':date' => $currentDate, ':timeslot' => $currentTimeslot]);
+        $selectedOptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Update the stock for selected options marked as in use
+        foreach ($selectedOptions as $option) {
+            if ($option['option_selected']) {
+                $stmt = $pdo->prepare('UPDATE options SET stock = stock - 1 WHERE option_name = :option_name AND stock > 0');
+                $stmt->execute([':option_name' => $option['option_name']]);
+            }
+        }
+
     } else {
         echo "No student booked for room $room at $currentTimeslot.\nChecking time to issue a booking for this walk in.";
         

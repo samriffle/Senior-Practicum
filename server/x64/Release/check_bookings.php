@@ -147,17 +147,6 @@ if (count($bookedRooms) !== 0) {
                 $stmt = $pdo->prepare('UPDATE availabilities SET is_available = true, sid = NULL WHERE room = :room AND date = :date AND timeslot = :timeslot');
                 $stmt->execute([':room' => $room['room'], ':date' => $currentDate, ':timeslot' => $currentTimeslot]);
 
-                // Get the list of option_names that were selected for the booking
-                $stmt = $pdo->prepare('SELECT DISTINCT option_name FROM room_options WHERE room = :room AND date = :date AND timeslot = :timeslot AND option_selected = true');
-                $stmt->execute([':room' => $room['room'], ':date' => $currentDate, ':timeslot' => $currentTimeslot]);
-                $selectedOptions = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-                // Update the stock for each selected option
-                $stmt = $pdo->prepare('UPDATE options SET stock = stock + 1 WHERE option_name = :option_name');
-                foreach ($selectedOptions as $option) {
-                    $stmt->execute([':option_name' => $option]);
-                }
-
                 // Reset room options
                 $stmt = $pdo->prepare('UPDATE room_options SET option_selected = false WHERE room = :room AND date = :date AND timeslot = :timeslot');
                 $stmt->execute([':room' => $room['room'], ':date' => $currentDate, ':timeslot' => $currentTimeslot]);
@@ -354,17 +343,6 @@ if (count($bookedRooms) !== 0) {
                                 // Update availabilities to set is_available true and remove the student ID for the selected room, date, and timeslot
                                 $stmt = $pdo->prepare('UPDATE availabilities SET is_available = true, sid = NULL WHERE room = :room AND date = :date AND timeslot = :timeslot');
                                 $stmt->execute([':room' => $rroom, ':date' => $issueTimeslotDate, ':timeslot' => $issueTimeslotTimeslot]);
-
-                                // Get the list of option_names that were selected for the booking
-                                $stmt = $pdo->prepare('SELECT DISTINCT option_name FROM room_options WHERE room = :room AND date = :date AND timeslot = :timeslot AND option_selected = true');
-                                $stmt->execute([':room' => $rroom, ':date' => $issueTimeslotDate, ':timeslot' => $issueTimeslotTimeslot]);
-                                $selectedOptions = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-                                // Update the stock for each selected option
-                                $stmt = $pdo->prepare('UPDATE options SET stock = stock + 1 WHERE option_name = :option_name');
-                                foreach ($selectedOptions as $option) {
-                                    $stmt->execute([':option_name' => $option]);
-                                }
 
                                 // Reset room_options to set option_selected false for the selected room, date, and timeslot
                                 $stmt = $pdo->prepare('UPDATE room_options SET option_selected = false WHERE room = :room AND date = :date AND timeslot = :timeslot');

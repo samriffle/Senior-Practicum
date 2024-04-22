@@ -66,12 +66,5 @@
         $stmt->execute();
     }
 
-    // Update options with decreased stock for selected options
-    $stmt = $pdo->prepare('UPDATE options SET stock = stock - 1 WHERE option_name = :option_name');
-    foreach ($_POST['selectedOptions'] as $selectedOption) {
-        $stmt->bindParam(':option_name', $selectedOption);
-        $stmt->execute();
-    }
-
     echo 'Database updated successfully.';
 ?>
