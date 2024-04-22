@@ -44,6 +44,19 @@
         .label {
             margin-bottom: 10px; /* Add space between label and table */
         }
+
+        .button-container {
+            margin-top: 20px; /* Add space above buttons */
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #808080;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -60,9 +73,17 @@
         </tbody>
     </table>
 
+    <div class="button-container">
+        <button class="button" id="limitedButton">Future Outlook</button>
+        <button class="button" id="originalButton">3 Hour Outlook</button>
+    </div>
+
     <script>
+        let useLimitedPHP = false;
+
         async function loadBookings() {
-            const response = await fetch('search_availabilities.php');
+            const phpFile = useLimitedPHP ? 'search_availabilities.php' : 'search_availabilities_limited.php';
+            const response = await fetch(phpFile);
             const data = await response.json();
             console.log(data);
 
@@ -119,6 +140,20 @@
         }
 
         loadBookings();
+
+        document.getElementById('limitedButton').addEventListener('click', () => {
+            useLimitedPHP = true;
+            loadBookings();
+            document.querySelector('h1.label').textContent = 'Bookings (Future)';
+        });
+
+        document.getElementById('originalButton').addEventListener('click', () => {
+            useLimitedPHP = false;
+            loadBookings();
+            document.querySelector('h1.label').textContent = 'Bookings (3 Hours)';
+        });
+
+        document.querySelector('h1.label').textContent = 'Bookings (3 Hours)';
         setInterval(loadBookings, 10000); // Refresh every 10 seconds
     </script>
 </body>
