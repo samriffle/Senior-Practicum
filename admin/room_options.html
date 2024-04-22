@@ -33,6 +33,8 @@
             margin-top: 20px;
             border-collapse: collapse;
             width: 50%;
+            margin-left: auto; /* Center the table */
+            margin-right: auto; /* Center the table */
         }
 
         th, td {
@@ -52,43 +54,53 @@
         tr:hover {
             background-color: #f9f9f9;
         }
+
+        /* New style for the div surrounding the form */
+        #form-container {
+            background-color: lightgrey;
+            padding: 20px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>Room Options</h1>
-    <label for="room-select">Select Room:</label>
-    <select id="room-select" onchange="getRoomOptions()">
-        <!-- Options will be dynamically populated -->
-    </select>
+    <div id="form-container">
+        <!-- Added div with id 'form-container' -->
+        <label for="room-select">Select Room:</label>
+        <select id="room-select" onchange="getRoomOptions()">
+            <!-- Options will be dynamically populated -->
+        </select>
 
-    <div>
-        <table id="options-table">
-            <thead>
-                <tr>
-                    <th>Option</th>
-                    <th>Select</th>
-                    <th>Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Table rows will be dynamically populated -->
-            </tbody>
-        </table>
+        <div>
+            <table id="options-table">
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Select</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be dynamically populated -->
+                </tbody>
+            </table>
 
-        <!-- Remove Options Button -->
-        <button onclick="removeOptions()">Remove Selected Options</button>
-    </div>
+            <!-- Remove Options Button -->
+            <button onclick="removeOptions()">Remove Selected Options</button>
+        </div>
 
-    <div>
-        <label for="new-option">Add New Room Option Name:</label>
-        <input type="text" id="new-option">
-        <button onclick="addOption()">Add Option</button>
-    </div>
+        <div>
+            <label for="new-option">Add New Room Option Name:</label>
+            <input type="text" id="new-option">
+            <button onclick="addOption()">Add Option</button>
+        </div>
 
-    <div>
-        <label for="stock-input">Input Stock For Checked Items:</label>
-        <input type="text" id="stock-input">
-        <button onclick="updateStock()">Update Stock</button>
+        <div>
+            <label for="stock-input">Input Stock For Checked Items:</label>
+            <input type="text" id="stock-input">
+            <button onclick="updateStock()">Update Stock</button>
+        </div>
     </div>
 
     <script>

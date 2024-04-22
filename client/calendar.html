@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Building an Accessible Calendar of Events in HTML, CSS, and JavaScript</title>
+    <title>Thorne Library Reservation Calendar</title>
     <style>
         table {
             width: 100%;
@@ -61,7 +61,7 @@
 </head>
 <body>
     <table>
-        <caption>Event Calendar</caption>
+        <caption>Reservation Calendar</caption>
         <thead>
             <tr>
                 <th scope="col">Sunday</th>
@@ -85,6 +85,9 @@
         </tfoot>
     </table>
     <button id="cancel-reservation">View Reservations</button>
+    <p style="margin-top: 20px; font-style: italic;">
+        To use the calendar, click through to find a date you want to study in the library. Then, select an available room for that date and click a timeslot for that room to try and reserve it. Please note, if you have a fine of $5, you must pay it before you can reserve a room. Previous reservations have been canceled due to the fine.
+    </p>
     <script>
         let activeOverlay = null;
         let currentDate = new Date();
@@ -353,7 +356,7 @@
                         simYearUpdate = currentYear;
                         simMonthUpdate = currentMonth;
 
-                       if (direction === 'next') {
+                        if (direction === 'next') {
                             simMonthUpdate++;
                             if (simMonthUpdate > 12) {
                                 simMonthUpdate = 1;
