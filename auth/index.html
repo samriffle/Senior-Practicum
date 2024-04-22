@@ -5,8 +5,12 @@
 </head>
 <body>
     <form id="authForm">
-        <label for="studentId">Student ID:</label>
+        <label for="studentId">ID:</label>
         <input type="text" id="studentId" name="studentId">
+        <div id="passwordField">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password">
+        </div>
         <button type="submit">Submit</button>
     </form>
 
@@ -25,18 +29,18 @@
             if (params.has('cancelReq')) {
                 // Redirect to cancel.html with the student ID
                 window.location.href = `../client/cancel.html?studentId=${studentId}`;
-            }
-            else if (params.has('adminLogin')) {
-                // Check if student ID is in the admin list
-                fetch('adminid.txt')
+            } else if (params.has('adminLogin')) {
+                // Check if student ID and password match the admin list
+                fetch('adminids.csv')
                     .then(response => response.text())
                     .then(data => {
-                        const adminIds = data.split('\n');
-                        if (adminIds.includes(studentId)) {
+                        const adminIds = data.split('\n').map(line => line.split(','));
+                        const isAdmin = adminIds.some(([id, password]) => id === studentId && password.trim() === document.getElementById('password').value.trim());
+                        if (isAdmin) {
                             // Redirect to room_status since admin is authenticated
                             window.location.href = `../admin/room_status.html?studentId=${studentId}`;
                         } else {
-                            alert('Student ID is not authorized as an admin.');
+                            alert('Admin ID or password is incorrect.');
                         }
                     })
                     .catch(error => {

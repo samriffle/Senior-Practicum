@@ -56,10 +56,9 @@ $end = strtotime(date($dateFormat, strtotime($dateRanges[1])));
 // Prepare a SQL query to insert timeslot availabilities
 $stmt = $pdo->prepare('INSERT INTO availabilities (room, date, timeslot, is_available, is_blocked, sid) VALUES (:room, :date, :timeslot, :is_available, :is_blocked, :sid)');
 
-$roomNames = [];
-for ($i = 130; $i <= 136; $i++) {
-    $roomNames[] = "Thorne " . $i;
-}
+// Read room names from rooms.txt
+$roomNamesFile = 'rooms.txt';
+$roomNames = file($roomNamesFile, FILE_IGNORE_NEW_LINES);
 
 // Loop through each room
 foreach ($roomNames as $room) {
@@ -128,10 +127,9 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS room_options (
 
 // Insert room options data
 $roomOptions = [];
-for ($roomNumber = 130; $roomNumber <= 136; $roomNumber++) {
-    $room = "Thorne $roomNumber";
+foreach ($roomNames as $room) {
     foreach ($options as $option) {
-        $roomOptions[] = ['room' => $room, 'option_name' => $option, 'option_unavailable'=> false ? 'true' : 'false', 'option_selected' => false ? 'true' : 'false'];
+        $roomOptions[] = ['room' => $room, 'option_name' => $option, 'option_unavailable' => false ? 'true' : 'false', 'option_selected' => false ? 'true' : 'false'];
     }
 }
 
