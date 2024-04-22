@@ -16,19 +16,6 @@ $stmt = $pdo->prepare('UPDATE availabilities SET is_available = true, is_blocked
 $stmt->bindParam(':date', $currentDate);
 $stmt->execute();
 
-// Get the list of option_names that were selected for the bookings before the current date
-$stmt = $pdo->prepare('SELECT option_name FROM room_options WHERE date < :date AND option_selected = true');
-$stmt->bindParam(':date', $currentDate);
-$stmt->execute();
-$selectedOptions = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-// Update the stock for each selected option
-$stmt = $pdo->prepare('UPDATE options SET stock = stock + 1 WHERE option_name = :option_name');
-foreach ($selectedOptions as $option) {
-    $stmt->bindParam(':option_name', $option);
-    $stmt->execute();
-}
-
 // Reset room_options to set option_selected false for dates before the current date
 $stmt = $pdo->prepare('UPDATE room_options SET option_selected = false WHERE date < :date AND option_selected = true');
 $stmt->bindParam(':date', $currentDate);
@@ -64,21 +51,6 @@ foreach ($studentsWithFine as $sid) {
         $stmt->bindParam(':date', $date);
         $stmt->bindParam(':timeslot', $timeslot);
         $stmt->execute();
-
-        // Get the list of option_names that were selected for the booking
-        $stmt = $pdo->prepare('SELECT DISTINCT option_name FROM room_options WHERE room = :room AND date = :date AND timeslot = :timeslot AND option_selected = true');
-        $stmt->bindParam(':room', $room);
-        $stmt->bindParam(':date', $date);
-        $stmt->bindParam(':timeslot', $timeslot);
-        $stmt->execute();
-        $selectedOptions = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        // Update the stock for each selected option
-        $stmt = $pdo->prepare('UPDATE options SET stock = stock + 1 WHERE option_name = :option_name');
-        foreach ($selectedOptions as $option) {
-            $stmt->bindParam(':option_name', $option);
-            $stmt->execute();
-        }
 
         // Reset room_options to set option_selected false for the selected room, date, and timeslot
         $stmt = $pdo->prepare('UPDATE room_options SET option_selected = false WHERE room = :room AND date = :date AND timeslot = :timeslot');
