@@ -3,7 +3,7 @@ A collection of my work on my senior practicum
 
 CSC-4081 Computer Applications Practicum I
 
-Project Proposal: Development a reservation system for Thorne Library study rooms as MVNU
+Project Proposal: Development a reservation system for Thorne Library study rooms at MVNU
 Sam Riffle
 
 <h2> 1. PURPOSE AND SCOPE </h2>
