@@ -42,3 +42,4 @@ This system will be used to allow students to view and reserve available rooms f
 
 <p>  Navigate to the auth directory and add new id's with passwords to adminids.csv</p>
 <p>  Navigate to the database directory and edit daterange.txt and rooms.txt to specify the range of dates the calendar will cover and what rooms are available.</p>
+<p>  Edit create_slide1.py and replace every sintance of a font name with one of your choosing.</p>
