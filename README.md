@@ -23,3 +23,17 @@ This system will be used to allow students to view and reserve available rooms f
 <p>External environmental factors that may affect usability include mentions of updating the current Thorne Library Website API within 1-2 years after this project is implemented, possibly rendering it obsolete. </p>
 <p>The system must interact with an authentication page tied to MVNU’s student ID's to pass credentials around to handle student fines for current and future reservations. 
 <p>The minimally viable system should be available by the end of the SP2024 semester</p>
+
+4. SETUP
+
+<p>  Ensure that postgres, php, and python have been installed , setup, and updated along with the necessary python packages (pillow, python-pptx, datetime, psycopg2)
+<p>  ex) pip show [package] </p>
+<p>  ex) pip install pillow python-pptx datetime psycopg2</p>
+<p>  Download the entire project into your empty directory of choice. </p>
+<p>  Start a php server instance pointing to that directory where this project is downloaded to.</p>
+<p>  ex)  php -S [yourip]:[yourport] -t [C:\path\to\directory].</p>
+<p>  Open a terminal instance and navigate to the root directory of this project.</p>
+<p>  Edit db_config.php with your desired postgres database credentials.</p>
+<p>  Navigate to server\x64\Release in the  project and edit the postgres credentials in lines 16-20 of create_slide1.py.</p>
+<p>  Navigate back to the root of the project tree and run each shell file in numerical ordering of their names.</p>
+<p>  Open an html in your browser to confirm that the project is working.</p>
