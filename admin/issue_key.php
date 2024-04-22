@@ -38,7 +38,55 @@ if (isset($_GET['room'])) {
             echo "Failed to issue key for room $room.";
         }
     } else {
-        echo "No student booked for room $room at $currentTimeslot.";
+        echo "No student booked for room $room at $currentTimeslot.\nChecking time to issue a booking for this walk in.";
+        
+        // Check to make sure current time isnt 10+ minutes past start of current timeslot interval
+        $currentTimeslotCheck = strtotime(date('H:i:00', floor(time() / 1800) * 1800)); // Round down to the nearest 30-minute interval
+        $currentTimeCheck = strtotime(date('H:i:s'));
+
+        if ($currentTimeCheck <= $currentTimeslotCheck + 600) {
+            // Check if the sid '0000000' already exists in the student table
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM student WHERE sid = :sid');
+            $stmt->bindParam(':sid', $wildcardSid);
+            $wildcardSid = '0000000';
+            $stmt->execute();
+            $count = $stmt->fetchColumn();
+
+            if ($count == 0) {
+                // Insert the new sid '0000000' into the student table
+                $stmt = $pdo->prepare('INSERT INTO student (sid) VALUES (:sid)');
+                $stmt->bindParam(':sid', $wildcardSid);
+                $wildcardSid = '0000000';
+                $stmt->execute();
+            }
+            else {
+                // Reset the fine for sid '0000000' since it shouldnt be tied to a real student and fined
+                $stmt = $pdo->prepare('UPDATE student SET fine = 0 WHERE sid = :sid');
+                $stmt->bindParam(':sid', $wildcardSid);
+                $stmt->execute();
+            }
+
+            // Book the wildcard student for the room
+            $stmt = $pdo->prepare('UPDATE availabilities SET is_available = false, sid = :sid WHERE room = :room AND date = :date AND timeslot = :timeslot');
+            $stmt->execute([':sid' => $wildcardSid, ':room' => $room, ':date' => $currentDate, ':timeslot' => $currentTimeslot]);
+
+            // Prepare the update query to set key_available to false and issue_time to the current timestamp for the specified room
+            $stmt = $pdo->prepare('UPDATE room_keys SET key_available = false, issue_time = :issue_time WHERE room = :room');
+            $stmt->bindParam(':room', $room, PDO::PARAM_STR);
+            $stmt->bindParam(':issue_time', $issueTime, PDO::PARAM_STR);
+
+            // Execute the query
+            $stmt->execute();
+
+            // Check if any rows were affected
+            if ($stmt->rowCount() > 0) {
+                echo "Walk-in booking successful for room $room at $issueTime.";
+            } else {
+                echo "Failed to issue key for walk-in at room $room.";
+            }
+        } else {
+            echo "Too late to issue a walk-in booking for this timeslot. Please wait.";
+        }
     }
 } else {
     // 'room' parameter not provided

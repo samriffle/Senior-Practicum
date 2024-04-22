@@ -42,9 +42,16 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS availabilities (
     CONSTRAINT pk_availabilities PRIMARY KEY (room, date, timeslot)
 )");
 
-// Define the date range (June 1, 2023 to June 1, 2024)
-$start = strtotime('2023-06-01');
-$end = strtotime('2024-06-01');
+// Read start and end dates from daterange.txt
+$dateRangeFile = 'daterange.txt';
+$dateRanges = file($dateRangeFile, FILE_IGNORE_NEW_LINES);
+
+// Define the date format in daterange.txt
+$dateFormat = 'Y-m-d';
+
+// Convert start and end dates to timestamps
+$start = strtotime(date($dateFormat, strtotime($dateRanges[0])));
+$end = strtotime(date($dateFormat, strtotime($dateRanges[1])));
 
 // Prepare a SQL query to insert timeslot availabilities
 $stmt = $pdo->prepare('INSERT INTO availabilities (room, date, timeslot, is_available, is_blocked, sid) VALUES (:room, :date, :timeslot, :is_available, :is_blocked, :sid)');
