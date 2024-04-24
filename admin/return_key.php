@@ -81,11 +81,11 @@ if (isset($_GET['room'])) {
             echo 'Booking removed successfully.';
 
             // Return the room key since the room has been cleared
-            $stmt = $pdo->prepare('UPDATE room_keys SET key_available = true WHERE room = :room');
+            $stmt = $pdo->prepare('UPDATE room_keys SET key_available = true, issue_time = null WHERE room = :room');
             $stmt->execute([':room' => $room]);
         } else {
             // Room was not booked at the specified time, set key_available back to true for the room
-            $stmt = $pdo->prepare('UPDATE room_keys SET key_available = true WHERE room = :room');
+            $stmt = $pdo->prepare('UPDATE room_keys SET key_available = true, issue_time = null WHERE room = :room');
             $stmt->execute([':room' => $room]);
             
             // Return an error message

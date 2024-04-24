@@ -12,6 +12,11 @@ try {
     $currentTime = date('H:i:s');
     $threeHoursLater = date('H:i:s', strtotime('+3 hours'));
 
+    // Ensure threeHoursLater does not exceed '23:00:00'
+    if ($threeHoursLater > '23:00:00') {
+        $threeHoursLater = '23:00:00';
+    }
+
     // Fetch all instances where is_available is false and the timeslot is within the next 3 hours, sorted by timeslot and date
     $sql = 'SELECT * FROM availabilities WHERE is_available = false AND date = CURRENT_DATE AND timeslot BETWEEN :currentTime AND :threeHoursLater ORDER BY date DESC, timeslot DESC';
     $stmt = $pdo->prepare($sql);

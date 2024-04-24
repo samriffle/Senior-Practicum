@@ -11,13 +11,24 @@
             padding: 0;
         }
 
+        .page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: white; /* Grey background */
+        }
+
         .container {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            height: 100vh;
             overflow: hidden;
+            padding: 20px;
+            background-color: lightgray; /* White background */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
         }
 
         table {
@@ -27,7 +38,7 @@
         }
 
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #A0A0A0;
             padding: 8px;
             text-align: left;
         }
@@ -66,42 +77,43 @@
         .line-break {
             clear: both;
         }
-
     </style>
 </head>
 <body>
-    <div class="container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Room Key</th>
-                    <th>Issued</th>
-                </tr>
-            </thead>
-            <tbody id="key-status"></tbody>
-        </table>
+    <div class="page">
+        <div class="container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room Key</th>
+                        <th>Issued</th>
+                    </tr>
+                </thead>
+                <tbody id="key-status"></tbody>
+            </table>
 
-        <div>
-            <div class="form-row">
-                <select id="issue-room-select">
-                    <!-- Options will be dynamically populated -->
-                </select>
-                <button onclick="issueKey()">Issue Key</button>
-                <select id="return-room-select">
-                    <!-- Options will be dynamically populated -->
-                </select>
-                <button onclick="returnKey()">Return Key</button>
-            </div>
+            <div>
+                <div class="form-row">
+                    <select id="issue-room-select">
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                    <button onclick="issueKey()">Issue Key</button>
+                    <select id="return-room-select">
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                    <button onclick="returnKey()">Return Key</button>
+                </div>
 
-            <!-- New row for additional buttons -->
-            <div class="form-row line-break">
-                <button id="reset-fines">Reset Fines</button>
-                <button id="edit-room-options">Edit Available Room Options</button>
-                <button id="edit-dates">Edit Available Dates</button>
-            </div>
+                <!-- New row for additional buttons -->
+                <div class="form-row line-break">
+                    <button id="reset-fines">Reset Fines</button>
+                    <button id="edit-room-options">Edit Available Room Options</button>
+                    <button id="edit-dates">Edit Available Dates</button>
+                </div>
 
-            <div class="form-row line-break">
-                <button id="show-bookings-options">Show Upcoming Bookings and Options</button>
+                <div class="form-row line-break">
+                    <button id="show-bookings-options">Show Upcoming Bookings and Options</button>
+                </div>
             </div>
         </div>
     </div>
@@ -148,7 +160,7 @@
                             const row = document.createElement('tr');
                             const roomCell = document.createElement('td');
                             roomCell.textContent = item.room;
-                            const options = { timeZone: 'America/New_York'};
+                            const options = { timeZone: 'America/New_York' };
                             const issueTimeUtc = new Date(item.issue_time);
                             const issueTime = new Date(issueTimeUtc.setHours(issueTimeUtc.getHours() + 4));
                             const timeslotCell = document.createElement('td');
@@ -274,7 +286,7 @@
         document.getElementById('show-bookings-options').addEventListener('click', function () {
             window.location.href = 'upcoming_bookings_options.html'; // Redirect to upcoming_bookings.html
         });
-        
+
     </script>
 </body>
 </html>

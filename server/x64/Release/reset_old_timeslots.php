@@ -103,6 +103,10 @@ echo "  Cleaning up keys\n";
 $stmt = $pdo->prepare('UPDATE room_keys SET issue_time = NULL WHERE key_available = true');
 $stmt->execute();
 
+echo "  Blocking rooms before today since they can no longer be reserved.\n";
+$stmt = $pdo->prepare('UPDATE availabilities SET is_blocked = true WHERE date < CURRENT_DATE');
+$stmt->execute();
+
 // Close the database connection
 $pdo = null;
 ?>

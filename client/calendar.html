@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thorne Library Reservation Calendar</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: lightgrey;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -13,7 +36,7 @@
         th, td {
             padding: 10px;
             text-align: center;
-            border: 1px solid #ccc;
+            border: 1px solid #666;
         }
 
         th {
@@ -38,14 +61,14 @@
             z-index: 9999;
         }
 
-        .overlay table {
-            width: 100%;
-        }
+            .overlay table {
+                width: 100%;
+            }
 
-        .overlay table td {
-            padding: 5px;
-            border-bottom: 1px solid #ccc;
-        }
+                .overlay table td {
+                    padding: 5px;
+                    border-bottom: 1px solid #ccc;
+                }
 
         .timeslots {
             max-height: 300px;
@@ -57,37 +80,68 @@
             text-align: center;
             margin-bottom: 10px;
         }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #cancel-reservation {
+            background-color: #ccc;
+            color: black;
+            padding: 10px 20px;
+            border: 1px solid white; /* Add thin white border */
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            #cancel-reservation:hover {
+                background-color: #fff;
+            }
+
+        .fine-message {
+            font-style: italic;
+            margin-top: 20px;
+            text-align: right;
+            padding: 0px 20px;
+        }
     </style>
 </head>
 <body>
-    <table>
-        <caption>Reservation Calendar</caption>
-        <thead>
-            <tr>
-                <th scope="col">Sunday</th>
-                <th scope="col">Monday</th>
-                <th scope="col">Tuesday</th>
-                <th scope="col">Wednesday</th>
-                <th scope="col">Thursday</th>
-                <th scope="col">Friday</th>
-                <th scope="col">Saturday</th>
-            </tr>
-        </thead>
-        <tbody id="calendar-body">
-            <!-- Calendar cells for days and weeks will be populated here -->
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3"><button id="prev-month">Previous Month</button></td>
-                <td colspan="4" id="month-year"></td>
-                <td colspan="3"><button id="next-month">Next Month</button></td>
-            </tr>
-        </tfoot>
-    </table>
-    <button id="cancel-reservation">View Reservations</button>
-    <p style="margin-top: 20px; font-style: italic;">
-        To use the calendar, click through to find a date you want to study in the library. Then, select an available room for that date and click a timeslot for that room to try and reserve it. Please note, if you have a fine of $5, you must pay it before you can reserve a room. Previous reservations have been canceled due to the fine.
-    </p>
+    <div class="container">
+        <table>
+            <caption>Reservation Calendar</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Sunday</th>
+                    <th scope="col">Monday</th>
+                    <th scope="col">Tuesday</th>
+                    <th scope="col">Wednesday</th>
+                    <th scope="col">Thursday</th>
+                    <th scope="col">Friday</th>
+                    <th scope="col">Saturday</th>
+                </tr>
+            </thead>
+            <tbody id="calendar-body">
+                <!-- Calendar cells for days and weeks will be populated here -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"><button id="prev-month">Previous Month</button></td>
+                    <td colspan="4" id="month-year"></td>
+                    <td colspan="3"><button id="next-month">Next Month</button></td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="button-container">
+            <button id="cancel-reservation">View Reservations</button>
+            <p class="fine-message">
+                To use the calendar, click through to find a date you want to study in the library. Then, select an available room for that date and click a timeslot for that room to try and reserve it. Please note, if you have a fine of $5, you must pay it before you can reserve a room. Previous reservations have been canceled due to the fine.
+            </p>
+        </div>
+    </div>
     <script>
         let activeOverlay = null;
         let currentDate = new Date();

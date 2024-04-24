@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrator Calendar To View, Block, and Unblock Events</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        .grey-background {
+            background-color: #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px; /* Set max-width to limit table width */
+            margin: 0 auto; /* Center the table horizontally */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -13,7 +36,7 @@
         th, td {
             padding: 10px;
             text-align: center;
-            border: 1px solid #ccc;
+            border: 1px solid #666;
         }
 
         th {
@@ -26,26 +49,6 @@
         }
 
         /* Add more styles as needed */
-        .overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 9999;
-        }
-
-            .overlay table {
-                width: 100%;
-            }
-
-                .overlay table td {
-                    padding: 5px;
-                    border-bottom: 1px solid #ccc;
-                }
 
         .timeslots {
             max-height: 300px;
@@ -60,61 +63,66 @@
     </style>
 </head>
 <body>
-    <table>
-        <caption>Admin Calendar</caption>
-        <thead>
-            <tr>
-                <th scope="col">Sunday</th>
-                <th scope="col">Monday</th>
-                <th scope="col">Tuesday</th>
-                <th scope="col">Wednesday</th>
-                <th scope="col">Thursday</th>
-                <th scope="col">Friday</th>
-                <th scope="col">Saturday</th>
-            </tr>
-        </thead>
-        <tbody id="calendar-body">
-            <!-- Calendar cells for days and weeks will be populated here -->
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3"><button id="prev-month">Previous Month</button></td>
-                <td colspan="4" id="month-year"></td>
-                <td colspan="3"><button id="next-month">Next Month</button></td>
-            </tr>
-        </tfoot>
-    </table>
-    <div id="filter-section">
-        <h2>Filter Options</h2>
-        <table>
-            <tr>
-                <td>
-                    <label for="room-select">Rooms:</label>
-                    <select id="room-select" multiple></select>
-                </td>
-                <td>
-                    <label for="date-from">Date From (YMD):</label>
-                    <select id="year-from"></select>
-                    <select id="month-from"></select>
-                    <select id="date-from"></select>
-                </td>
-                <td>
-                    <label for="date-to">Date To (YMD):</label>
-                    <select id="year-to"></select>
-                    <select id="month-to"></select>
-                    <select id="date-to"></select>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3">
-                    <label for="timeslot-select">Timeslots:</label>
-                    <select id="timeslot-select" multiple></select>
-                </td>
-            </tr>
-        </table>
+    
+    <div class="container">
+        <div class="grey-background">
+            <table>
+                <caption>Admin Calendar</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Sunday</th>
+                        <th scope="col">Monday</th>
+                        <th scope="col">Tuesday</th>
+                        <th scope="col">Wednesday</th>
+                        <th scope="col">Thursday</th>
+                        <th scope="col">Friday</th>
+                        <th scope="col">Saturday</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body">
+                    <!-- Calendar cells for days and weeks will be populated here -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3"><button id="prev-month">Previous Month</button></td>
+                        <td colspan="4" id="month-year"></td>
+                        <td colspan="3"><button id="next-month">Next Month</button></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div id="filter-section">
+            <h2>Filter Options</h2>
+            <table>
+                <tr>
+                    <td>
+                        <label for="room-select">Rooms:</label>
+                        <select id="room-select" multiple></select>
+                    </td>
+                    <td>
+                        <label for="date-from">Date From (YMD):</label>
+                        <select id="year-from"></select>
+                        <select id="month-from"></select>
+                        <select id="date-from"></select>
+                    </td>
+                    <td>
+                        <label for="date-to">Date To (YMD):</label>
+                        <select id="year-to"></select>
+                        <select id="month-to"></select>
+                        <select id="date-to"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <label for="timeslot-select">Timeslots:</label>
+                        <select id="timeslot-select" multiple></select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <button id="block-button">Block</button>
+        <button id="unblock-button">Unblock</button>
     </div>
-    <button id="block-button">Block</button>
-    <button id="unblock-button">Unblock</button>
 
     <script>
         let activeOverlay = null;

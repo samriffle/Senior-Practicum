@@ -24,7 +24,7 @@ conn = psycopg2.connect(host=db_host, port=db_port, database=db_name, user=db_us
 cursor = conn.cursor()
 
 # Get current date and time
-current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
 current_date = datetime.datetime.now().strftime('%Y-%m-%d')
 current_time = datetime.datetime.now().replace(minute=30 if datetime.datetime.now().minute >= 30 else 0, second=0, microsecond=0).strftime('%H:%M:%S')
 
@@ -166,6 +166,11 @@ prs.save(pptx_file_path)
 
 
 # Image arc
+
+# Get current date and time
+current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+current_time = datetime.datetime.now().replace(minute=30 if datetime.datetime.now().minute >= 30 else 0, second=0, microsecond=0).strftime('%H:%M:%S')
 
 # Create a new image for the title slide
 title_slide_image = Image.new('RGB', (1920, 1080), color='white')
