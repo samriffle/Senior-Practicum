@@ -17,7 +17,7 @@ echo "\nBooking Validation Start {$currentDate}," . date("H:i:s") . "\n";
 // _____________________________________________________________ Pt. 1 Manage Current Keys For Current Bookings (Issued From Current Timeslot) _____________________________________________________________ //
 
 // Check for bookings that should be active in the current timeslot
-$stmt = $pdo->prepare('SELECT * FROM availabilities WHERE date = :date AND timeslot = :timeslot AND is_available = false');
+$stmt = $pdo->prepare('SELECT * FROM availabilities WHERE date = :date AND timeslot = :timeslot AND is_available = false ORDER BY room ASC');
 $stmt->execute([':date' => $currentDate, ':timeslot' => $currentRoundedTimeslot]);
 $bookedRooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -26,7 +26,7 @@ if (count($bookedRooms) !== 0) {
     foreach ($bookedRooms as $room) {
         
         // Check if a key is issued or not issued for this room in the current timeslot
-        echo "  Reviewing room key for {$room['room']} \n";
+        echo "  1. Reviewing room key for {$room['room']} \n";
         $stmt = $pdo->prepare('SELECT * FROM room_keys WHERE room = :room AND date = :date AND timeslot = :timeslot AND key_available = false');
         $stmt->execute([':room' => $room['room'], ':date' => $currentDate, ':timeslot' => $currentRoundedTimeslot]);
         $keyIssued = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -35,14 +35,18 @@ if (count($bookedRooms) !== 0) {
         if ($keyIssued) {
 
             // Do nothing booking is going swimmingly or booking will be handled by pt.2
-            echo "      Key has been issued for {$room['room']}. \n";
+            if ($keyIssued['issue_time'] < $currentRoundedTimestamp) {
+                echo "      Key has been issued for {$room['room']}, but it was issued before the current timeslot.\n";
+            } else {
+                echo "      Key has been issued for {$room['room']}. \n";
+            }
 
         // Else when key not issued
         } else {
 
             // Check if 10 minutes have passed since currentRoundedTimeslot started
             echo "      Key has not been issued for {$room['room']} yet. \n";
-            $currentTimestamp = date('Y-m-d H:i:s');
+            $currentTimestamp = '15:01:00';//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////date('Y-m-d H:i:s');
             $bookingStartTimestamp = $currentDate . ' ' . $room['timeslot'];
             $bookingStartTimestamp = date('Y-m-d H:i:s', strtotime($bookingStartTimestamp));
             $timeDiff = strtotime($currentTimestamp) - strtotime($bookingStartTimestamp);
@@ -92,7 +96,7 @@ if (count($bookedRooms) !== 0) {
 // _____________________________________________________________ Pt. 2 Manage Late Keys For Hung Bookings (Issued From Past Timeslot) _____________________________________________________________ //
 
 // Check for any old keys for students in their room past the previous timeslot where key_available = false and issue_time < currentRoundedTimestamp
-$stmt = $pdo->prepare('SELECT DISTINCT room FROM room_keys WHERE issue_time < :issue_time AND key_available = false');
+$stmt = $pdo->prepare('SELECT DISTINCT room FROM room_keys WHERE issue_time < :issue_time AND key_available = false ORDER BY room ASC');
 $stmt->execute([':issue_time' => $currentRoundedTimestamp]);
 $oldKeys = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -100,13 +104,22 @@ $oldKeys = $stmt->fetchAll(PDO::FETCH_COLUMN);
 foreach ($oldKeys as $oldKey) {
 
     // Check if theres a booking in availabilities for the key's room, the currentDate, and the currentTimeslotRounded
-    echo "  Reviewing tardy key for room {$oldKey}. \n";
+    echo "  2. Reviewing tardy key for room {$oldKey}. \n";
     $stmt = $pdo->prepare('SELECT * FROM availabilities WHERE room = :room AND date = :date AND timeslot = :timeslot AND sid IS NOT NULL');
     $stmt->execute([':room' => $oldKey, ':date' => $currentDate, ':timeslot' => $currentRoundedTimeslot]);
     $booking = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // If there is a booking on it already
+    // If there is a booking on it already 
     if ($booking) {
+
+        // Fine sid of keyholder
+        $previousTimeslot = date('H:i:00', strtotime($currentRoundedTimeslot) - 1800);
+        $stmt = $pdo->prepare('SELECT * FROM availabilities WHERE room = :room AND date = :date AND timeslot = :timeslot AND sid IS NOT NULL');
+        $stmt->execute([':room' => $oldKey, ':date' => $currentDate, ':timeslot' => $previousTimeslot]);
+        $bookingPrev = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare('UPDATE student SET fine = fine + 1 WHERE sid = :sid AND fine < 5');
+        $stmt->execute([':sid' => $bookingPrev['sid']]);
+        echo "      Fine increased for student {$bookingPrev['sid']}. \n";
 
         // Returnkey.php clone on previous timeslot (-30 minutes ago)
         echo "      Already a booking on current timeslot. Cannot reschedule. Removing old info and returning key. \n";
@@ -165,17 +178,16 @@ foreach ($oldKeys as $oldKey) {
             echo "          No key issued for room $room.\n";
         }
 
-        // Fine sid of keyholder
-        echo "      Fine increased for student {$booking['sid']}. \n";
-        $stmt = $pdo->prepare('UPDATE student SET fine = fine + 1 WHERE sid = :sid AND fine < 5');
-        $stmt->execute([':sid' => $booking['sid']]);
-
     // Else 
     } else {
 
         // Does sid tied to that room key's old booking have a fine >= 5 (availabilities['sid'] -> student['sid', 'fine'])
+        $previousTimeslot = date('H:i:00', strtotime($currentRoundedTimeslot) - 1800);
+        $stmt = $pdo->prepare('SELECT * FROM availabilities WHERE room = :room AND date = :date AND timeslot = :timeslot AND sid IS NOT NULL');
+        $stmt->execute([':room' => $oldKey, ':date' => $currentDate, ':timeslot' => $previousTimeslot]);
+        $bookingPrev = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt = $pdo->prepare('SELECT fine FROM student WHERE sid = :sid');
-        $stmt->execute([':sid' => $booking['sid']]);
+        $stmt->execute([':sid' => $bookingPrev['sid']]);
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // If sid's fine >= 5
@@ -238,20 +250,29 @@ foreach ($oldKeys as $oldKey) {
                 echo "          No key issued for room $room.\n";
             }
 
-        // Else
+        // Else sid can be fined and extended
         } else {
+
+            // Fine sid of keyholder
+            $previousTimeslot = date('H:i:00', strtotime($currentRoundedTimeslot) - 1800);
+            $stmt = $pdo->prepare('SELECT * FROM availabilities WHERE room = :room AND date = :date AND timeslot = :timeslot AND sid IS NOT NULL');
+            $stmt->execute([':room' => $oldKey, ':date' => $currentDate, ':timeslot' => $previousTimeslot]);
+            $bookingPrev = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $pdo->prepare('UPDATE student SET fine = fine + 1 WHERE sid = :sid AND fine < 5');
+            $stmt->execute([':sid' => $bookingPrev['sid']]);
+            echo "      Fine increased for student {$bookingPrev['sid']}. \n";
 
             // Move room options + sid to new timeslot in booking
             echo "      Moving over options from old booking to current booking.\n";
             $previousTimeslot = date('H:i:00', strtotime($currentRoundedTimeslot) - 1800);
             $stmt = $pdo->prepare('UPDATE availabilities SET is_available = false, sid = :sid WHERE room = :room AND date = :date AND timeslot = :timeslot');
-            $stmt->execute([':sid' => $booking['sid'], ':room' => $oldKey, ':date' => $currentDate, ':timeslot' => $currentRoundedTimeslot]);
+            $stmt->execute([':sid' => $bookingPrev['sid'], ':room' => $oldKey, ':date' => $currentDate, ':timeslot' => $currentRoundedTimeslot]);
             $stmt = $pdo->prepare('SELECT DISTINCT option_name FROM room_options WHERE room = :room AND date = :date AND timeslot = :timeslot AND option_selected = true');
-            $stmt->execute([':room' => $booking['sid'], ':date' => $currentDate, ':timeslot' => $previousTimeslot]);
+            $stmt->execute([':room' => $bookingPrev['room'], ':date' => $currentDate, ':timeslot' => $previousTimeslot]);
             $carryoverOptions = $stmt->fetchAll(PDO::FETCH_COLUMN);
             $stmt = $pdo->prepare('UPDATE room_options SET option_selected = true WHERE room = :room AND date = :date AND timeslot = :timeslot AND option_name = :option_name');
             foreach ($carryoverOptions as $selectedOption) {
-                $stmt->execute([':room' => $booking['sid'], ':date' => $currentDate, ':timeslot' => $currentRoundedTimeslot, ':option_name' => $selectedOption]);
+                $stmt->execute([':room' => $bookingPrev['room'], ':date' => $currentDate, ':timeslot' => $currentRoundedTimeslot, ':option_name' => $selectedOption]);
             }
             
             // Returnkey.php clone on previous timeslot (-30 minutes ago) but ignore stock options since new booking inherits them
@@ -304,11 +325,6 @@ foreach ($oldKeys as $oldKey) {
                 echo "          No key issued for room $room.\n";
             }
 
-            // Fine sid of keyholder
-            echo "      Fine increased for student {$booking['sid']}. \n";
-            $stmt = $pdo->prepare('UPDATE student SET fine = fine + 1 WHERE sid = :sid AND fine < 5');
-            $stmt->execute([':sid' => $booking['sid']]);
-
             // Reissue room key (again ignore stock options)
             echo "      Reissuing key to extended room booking.\n";
             $issueTime = date('Y-m-d H:i:s');
@@ -343,6 +359,28 @@ foreach ($oldKeys as $oldKey) {
 // Multiple tardy key returns may be handled at once by section 2 relating to the previous timeslot.
 
 // Close the database connection
+
+// Log of what I think might be a successful test
+/*
+    Booking Validation Start 2024-04-24,14:16:21
+      1. Reviewing room key for Thorne 130
+          Key has been issued for Thorne 130.
+      2. Reviewing tardy key for room Thorne 130.
+          Fine increased for student 7777777.
+          Already a booking on current timeslot. Cannot reschedule. Removing old
+    info and returning key.
+              Student not removed. Fine amount is not 0.
+              Booking removed successfully.
+      2. Reviewing tardy key for room Thorne 131.
+          Fine increased for student 8888888.
+          Moving over options from old booking to current booking.
+          Removing old info and returning key.
+              Student not removed. Student ID still exists in availabilities.
+              Booking removed successfully.
+          Reissuing key to extended room booking.
+              Key issued successfully for room Thorne 131 at 2024-04-24 14:31:00.
+*/
+
 $pdo = null;
 ?>
 
