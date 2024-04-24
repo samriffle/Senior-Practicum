@@ -13,10 +13,11 @@
             align-items: center;
             height: 100vh;
             background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
         }
 
         .container {
-            width: 80%;
+            width: 90vw; /* Use viewport units for width */
             max-width: 800px;
             display: flex;
             flex-direction: column;
@@ -48,7 +49,6 @@
             background-color: #f5f5f5;
         }
 
-        /* Add more styles as needed */
         .overlay {
             position: fixed;
             top: 50%;
@@ -104,8 +104,55 @@
         .fine-message {
             font-style: italic;
             margin-top: 20px;
-            text-align: right;
+            text-align: center;
             padding: 0px 20px;
+        }
+
+        @media (max-width: 768px) {
+            /* Adjust styles for smaller screens */
+            body {
+                padding-top: 100px; /* Add padding to the top of the page */
+            }
+
+            .container {
+                width: 95vw; /* Use viewport units for width */
+                max-width: 800px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background-color: lightgrey;
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+            }
+
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #cancel-reservation {
+                margin-top: 10px;
+            }
+        }
+
+        /* Media query for vertical orientation on phones */
+        @media (max-width: 768px) and (orientation: portrait) {
+            body {
+                padding-top: 100px; /* Add more padding for vertical orientation */
+                padding-left: 300px;
+                overflow: hidden; /* Prevent scrolling */
+                background-color: lightgrey;
+            }
+
+            .container {
+                padding: 160px; /* Adjust padding for better layout */
+            }
+
+            .button-container {
+                margin-top: 15px; /* Adjust margin for better layout */
+            }
         }
     </style>
 </head>
@@ -129,9 +176,9 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3"><button id="prev-month">Previous Month</button></td>
-                    <td colspan="4" id="month-year"></td>
-                    <td colspan="3"><button id="next-month">Next Month</button></td>
+                    <td colspan="2"><button id="prev-month">Previous Month</button></td>
+                    <td colspan="3" id="month-year"></td>
+                    <td colspan="2"><button id="next-month">Next Month</button></td>
                 </tr>
             </tfoot>
         </table>
@@ -357,7 +404,9 @@
                         gapDays++;
                     }
                     else if (date > daysInMonth) {
-                        break;
+                        //break;
+                        const emptyCell = document.createTextNode('');
+                        cell.appendChild(emptyCell);
                     }
                     else {
                         const dayOfWeek = j === 0 ? 'Sunday' :

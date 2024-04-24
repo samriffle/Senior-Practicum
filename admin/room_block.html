@@ -96,9 +96,9 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3"><button id="prev-month">Previous Month</button></td>
-                        <td colspan="4" id="month-year"></td>
-                        <td colspan="3"><button id="next-month">Next Month</button></td>
+                        <td colspan="2"><button id="prev-month">Previous Month</button></td>
+                        <td colspan="3" id="month-year"></td>
+                        <td colspan="2"><button id="next-month">Next Month</button></td>
                     </tr>
                 </tfoot>
             </table>
@@ -344,7 +344,9 @@
                         gapDays++;
                     }
                     else if (date > daysInMonth) {
-                        break;
+                        //break;
+                        const emptyCell = document.createTextNode('');
+                        cell.appendChild(emptyCell);
                     }
                     else {
                         const dayOfWeek = j === 0 ? 'Sunday' :
