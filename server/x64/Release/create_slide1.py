@@ -16,7 +16,7 @@ BLACK = RGBColor(0, 0, 0)
 db_host = 'localhost'
 db_port = 5432
 db_name = 'calendar'
-db_user = 'postgres'
+db_user = 'samriffle'
 db_password = 'password'
 
 # Connect to the database
@@ -172,24 +172,35 @@ current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
 current_date = datetime.datetime.now().strftime('%Y-%m-%d')
 current_time = datetime.datetime.now().replace(minute=30 if datetime.datetime.now().minute >= 30 else 0, second=0, microsecond=0).strftime('%H:%M:%S')
 
-# Create a new image for the title slide
-title_slide_image = Image.new('RGB', (1920, 1080), color='white')
-title_draw = ImageDraw.Draw(title_slide_image)
-title_font = ImageFont.truetype("arial", 100)  # Adjust font size as needed
-title_text = "Study Room Information\n" + current_datetime
+# Create a new image for the title slide with deepskyblue background
+title_slide_image = Image.new('RGB', (1920, 1080), color='deepskyblue')
+border_width = 40  # Border width in pixels
+border_color = 'midnightblue'  # Border color
+
+# Create a background image with the border
+background_image = Image.new('RGB', (1920 - 2 * border_width, 1080 - 2 * border_width), color=border_color)
+title_slide_image.paste(background_image, (border_width, border_width))
 
 # Draw the text in the center
-title_draw.text((400, 400), title_text, fill='black', font=title_font)
+title_draw = ImageDraw.Draw(title_slide_image)
+title_font = ImageFont.truetype("NotoSans-Regular.ttf", 100)  # Adjust font size as needed
+title_text = "Study Room Information\n" + current_datetime
+title_draw.text((400, 400), title_text, fill='white', font=title_font)
 
 # Save the title slide image
 title_slide_image.save('slide_1.png')
 
 # Create a new image for the study aids slide
-study_aids_image = Image.new('RGB', (1920, 1080), color='white')
-study_aids_draw = ImageDraw.Draw(study_aids_image)
-study_aids_font_title = ImageFont.truetype("arial", 100)  # Adjust font size and font file as needed
-study_aids_font = ImageFont.truetype("arial", 60)  # Adjust font size and font file as needed
-study_aids_draw.text((720, 400), "Study Aids", fill='black', font=study_aids_font_title)
+title_slide_image_2 = Image.new('RGB', (1920, 1080), color='deepskyblue')
+
+# Create a background image with the border
+background_image_2 = Image.new('RGB', (1920 - 2 * border_width, 1080 - 2 * border_width), color=border_color)
+title_slide_image_2.paste(background_image_2, (border_width, border_width))
+
+study_aids_draw = ImageDraw.Draw(title_slide_image_2)
+study_aids_font_title = ImageFont.truetype("NotoSans-Regular.ttf", 100)  # Adjust font size and font file as needed
+study_aids_font = ImageFont.truetype("NotoSans-Regular.ttf", 60)  # Adjust font size and font file as needed
+study_aids_draw.text((720, 400), "Study Aids", fill='white', font=study_aids_font_title)
 
 # Fetch distinct room options from the database where option_unavailable is false
 cursor.execute("SELECT DISTINCT option_name FROM room_options WHERE option_unavailable = 'false'")
@@ -223,19 +234,24 @@ for i, option_name in enumerate(room_options):
     study_aids_draw.text((left + cell_padding, top + cell_padding), option_name, fill='black', font=study_aids_font)
 
 # Save the study aids image
-study_aids_image.save('slide_2.png')
+title_slide_image_2.save('slide_2.png')
 
 # Create a new image for the room availability slide
-room_availability_image = Image.new('RGB', (1920, 1080), color='white')
+room_availability_image = Image.new('RGB', (1920, 1080), color='deepskyblue')
+
+# Create a background image with the border
+background_image_3 = Image.new('RGB', (1920 - 2 * border_width, 1080 - 2 * border_width), color=border_color)
+room_availability_image.paste(background_image_3, (border_width, border_width))
+
 room_availability_draw = ImageDraw.Draw(room_availability_image)
-room_availability_font_title = ImageFont.truetype("arial", 100)  # Adjust font size and font file as needed
-room_availability_font = ImageFont.truetype("arial", 60)  # Adjust font size and font file as needed
+room_availability_font_title = ImageFont.truetype("NotoSans-Regular.ttf", 100)  # Adjust font size and font file as needed
+room_availability_font = ImageFont.truetype("NotoSans-Regular.ttf", 60)  # Adjust font size and font file as needed
 
 # Add title
 title_text = "Room Availability"
 title_text_width = len(title_text) * 30  # Estimate width based on character count
 title_left = (1920 - title_text_width) / 2
-room_availability_draw.text((570, 400), title_text, fill='black', font=room_availability_font_title)
+room_availability_draw.text((570, 300), title_text, fill='white', font=room_availability_font_title)
 
 # Fetch all rooms from the room_keys table, sorted alphabetically
 cursor.execute("SELECT DISTINCT room FROM room_keys ORDER BY room")
@@ -279,15 +295,17 @@ for i, room in enumerate(rooms):
         is_blocked = False
 
     # Set the fill color and outline color based on key availability and block status
-    fill_color = 'green' if key_available and not is_blocked else 'red'
+    fill_color = 'white'
     outline_color = 'black'
     room_availability_draw.rectangle([left, top, left + cell_width, top + cell_height], fill=fill_color, outline=outline_color, width=outline_width)
 
     # Add text to the cell
-    room_availability_draw.text((left + 10, top + 10), room, fill='black', font=room_availability_font)
+    text_color = 'black' if key_available else 'white'
+    room_availability_draw.text((left + 10, top + 10), room, fill=text_color, font=room_availability_font)
 
 # Save the room availability image
 room_availability_image.save('slide_3.png')
+
 
 # Close database connection
 cursor.close()

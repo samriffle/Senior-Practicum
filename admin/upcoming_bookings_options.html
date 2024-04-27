@@ -25,11 +25,20 @@
             overflow-x: auto; /* Enable horizontal scrolling */
         }
 
-        th, td {
+        th {
             border: 1px solid #808080;
             padding: 8px;
             text-align: left;
             width: 150px; /* Fixed width for each cell */
+            color: black;
+        }
+
+        td {
+            border: 1px solid #808080;
+            padding: 8px;
+            text-align: left;
+            width: 150px; /* Fixed width for each cell */
+            color: white;
         }
 
         th {
@@ -43,9 +52,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: lightgrey;
+            background-color: midnightblue;
             padding: 20px;
             border-radius: 10px;
+            border: 8px solid gray;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -56,6 +66,7 @@
 
         .label {
             margin-bottom: 10px; /* Add space between label and table */
+            color: white;
         }
 
         .button-container {
@@ -64,11 +75,23 @@
 
         .button {
             padding: 10px 20px;
-            background-color: #808080;
-            color: white;
+            background-color: white;
+            color: black;
             border: none;
             cursor: pointer;
             margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #ccc; /* Light grey on hover */
+        }
+
+        tr:nth-child(odd) {
+            background-color: deepskyblue; /* Light grey */
+        }
+
+        tr:nth-child(even) {
+            background-color: steelblue; /* Mid grey */
         }
     </style>
 </head>
@@ -76,16 +99,18 @@
 <body>
     <div class="container">
         <h1 class="label">Bookings</h1>
-        <table id="bookingTable">
-            <thead>
-                <tr>
-                    <th>Room</th>
-                    <th>Bookings</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <div style="max-height: 200px; overflow-y: auto;">
+            <table id="bookingTable">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Bookings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
 
         <div class="button-container">
             <button class="button" id="limitedButton">Future Outlook</button>

@@ -12,11 +12,13 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
+            background-color: #f9f9f9;
         }
 
         label {
             display: block;
             margin-bottom: 10px;
+            color: white;
         }
 
         select, input[type="text"], button {
@@ -27,7 +29,12 @@
 
         button {
             cursor: pointer;
+            background-color: white;
         }
+
+            button:hover {
+                background-color: #ccc; /* Light grey on hover */
+            }
 
         table {
             margin-top: 20px;
@@ -35,6 +42,10 @@
             width: 50%;
             margin-left: auto; /* Center the table */
             margin-right: auto; /* Center the table */
+        }
+
+        .options-label {
+            color: white;
         }
 
         th, td {
@@ -47,8 +58,12 @@
             background-color: #f2f2f2;
         }
 
+        tr:nth-child(odd) {
+            background-color: deepskyblue;
+        }
+
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: steelblue;
         }
 
         tr:hover {
@@ -57,22 +72,24 @@
 
         /* New style for the div surrounding the form */
         #form-container {
-            background-color: lightgrey;
+            background-color: midnightblue;
             padding: 20px;
             border-radius: 5px;
+            position: center;
+            border: 8px solid gray;
         }
     </style>
 </head>
 <body>
-    <h1>Room Options</h1>
     <div id="form-container">
+        <h1 class="options-label">Room Options</h1> <!-- Added label -->
         <!-- Added div with id 'form-container' -->
         <label for="room-select">Select Room:</label>
         <select id="room-select" onchange="getRoomOptions()">
             <!-- Options will be dynamically populated -->
         </select>
 
-        <div>
+        <div style="max-height: 200px; overflow-y: auto;">
             <table id="options-table">
                 <thead>
                     <tr>

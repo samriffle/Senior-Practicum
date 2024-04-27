@@ -15,17 +15,22 @@
             padding: 0;
         }
 
+        .fine-label {
+            color: white;
+        }
+
         .container {
             width: 400px;
             padding: 20px;
-            border: 1px solid #ccc;
+            border: 8px solid gray;
             border-radius: 5px;
-            background-color: lightgrey; /* Added background color */
+            background-color: midnightblue; /* Added background color */
         }
 
         label {
             display: block;
             margin-bottom: 10px;
+            color: white;
         }
 
         select, input[type="number"], button {
@@ -34,9 +39,20 @@
             font-size: 14px;
         }
 
+        #fine-value {
+            color: white;
+        }
+
         button {
+            border: none;
+            background-color: white;
+            color: black;
             cursor: pointer;
         }
+
+            button:hover {
+                background-color: #ccc; /* Light grey on hover */
+            }
 
         #fine-value {
             display: inline-block;
@@ -46,7 +62,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Fine Review</h1>
+        <h1 class="fine-label">Fine Review</h1> <!-- Added label -->
         <label for="student-id">Select Student ID:</label>
         <select id="student-id" onchange="getFineValue()">
             <!-- Options will be dynamically populated -->

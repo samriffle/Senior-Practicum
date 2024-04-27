@@ -19,14 +19,20 @@
             background-color: white; /* Grey background */
         }
 
+        .container-label {
+            margin-bottom: 10px;
+            color: white;
+        }
+
         .container {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             overflow: hidden;
+            border: 8px solid gray;
             padding: 20px;
-            background-color: lightgray; /* White background */
+            background-color: midnightblue; /* White background */
             border-radius: 5px; /* Rounded corners */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
         }
@@ -43,12 +49,21 @@
             text-align: left;
         }
 
+        #containerTable thead th {
+            background-color: white; /* Dark background color */
+            color: black; /* Text color */
+        }
+
         th {
             background-color: #f2f2f2;
         }
 
+        tr:nth-child(odd) {
+            background-color: deepskyblue;
+        }
+
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: steelblue;
         }
 
         tr:hover {
@@ -69,30 +84,95 @@
             .form-row button {
                 padding: 8px 16px;
                 border: none;
-                background-color: #808080;
-                color: white;
+                background-color: white;
+                color: black;
                 cursor: pointer;
             }
+
+                .form-row button:hover {
+                    background-color: #ccc; /* Light grey on hover */
+                }
 
         .line-break {
             clear: both;
         }
+
+        @media (max-width: 768px) {
+            /* Adjust styles for smaller screens */
+            body {
+                padding-top: 10px; /* Add padding to the top of the page */
+            }
+
+            .container {
+                width: 95vw; /* Use viewport units for width */
+                max-width: 800px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background-color: midnightblue;
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+            }
+        }
+
+        /* Media query for vertical orientation on phones */
+        @media (max-width: 768px) and (orientation: portrait) {
+            body {
+                overflow: hidden; /* Prevent scrolling */
+                background-color: midnightblue;
+                padding-top: 0; /* Remove top padding */
+            }
+
+            .container {
+                width: 95vw; /* Use viewport units for width */
+                max-width: 800px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background-color: midnightblue;
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+                margin-top: -8px; /* Adjust for the border */
+            }
+
+            .form-row {
+                display: block;
+                margin-top: 10px;
+                max-height: 200px; /* Set maximum height */
+                overflow-y: auto; /* Add vertical scrollbar if content exceeds max-height */
+            }
+
+                .form-row button {
+                    display: block;
+                    margin-top: 10px;
+                    width: 100%;
+                }
+        }
+
+
     </style>
 </head>
 <body>
     <div class="page">
         <div class="container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room Key</th>
-                        <th>Issued</th>
-                    </tr>
-                </thead>
-                <tbody id="key-status"></tbody>
-            </table>
+            <h2 class="container-label">Dashboard</h2> <!-- Added label -->
+            <div style="max-height: 200px; overflow-y: auto;">
+                <table id="containerTable">
+                    <thead>
+                        <tr>
+                            <th>Room Key</th>
+                            <th>Issued</th>
+                        </tr>
+                    </thead>
+                    <tbody id="key-status"></tbody>
+                </table>
+            </div>
 
-            <div>
+            <div style="max-height: 200px; overflow-y: auto;">
                 <div class="form-row">
                     <select id="issue-room-select">
                         <!-- Options will be dynamically populated -->

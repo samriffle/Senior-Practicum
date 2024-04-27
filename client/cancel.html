@@ -14,6 +14,7 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
+            background-color: #f9f9f9;
         }
 
         .options-container {
@@ -21,9 +22,19 @@
             width: 100%;
             overflow-y: auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            border: 8px solid gray;
             border-radius: 5px;
-            background-color: lightgrey;
+            background-color: midnightblue;
+        }
+
+        .reservations-label {
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        #reservationsTable thead th {
+            background-color: white; /* Dark background color */
+            color: black; /* Text color */
         }
 
         table {
@@ -34,6 +45,7 @@
         th, td {
             padding: 10px;
             text-align: left;
+            color: white;
         }
 
         th {
@@ -41,29 +53,40 @@
         }
 
         tr:nth-child(odd) {
-            background-color: #f2f2f2; /* Light grey */
+            background-color: deepskyblue; /* Light grey */
         }
 
         tr:nth-child(even) {
-            background-color: #ddd; /* Mid grey */
+            background-color: steelblue; /* Mid grey */
         }
+
+        @media (max-width: 768px) {
+            /* Adjust styles for smaller screens */
+            .reservationsTable {
+                max-height: 100px; /* Updated max-height for sideways mobile */
+            }
+        }
+
     </style>
 </head>
 <body>
     <div class="options-container" id="reservationsContainer">
-        <table id="reservationsTable">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Room</th>
-                    <th>Date</th>
-                    <th>Timeslot</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Reservations will be dynamically inserted here -->
-            </tbody>
-        </table>
+        <h2 class="reservations-label">Reservations</h2> <!-- Added label -->
+        <div style="max-height: 200px; overflow-y: auto;">
+            <table id="reservationsTable">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Room</th>
+                        <th>Date</th>
+                        <th>Timeslot</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Reservations will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
         <button onclick="processTransaction()">Cancel Selected Reservations</button>
     </div>
     <script>

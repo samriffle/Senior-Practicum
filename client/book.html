@@ -21,13 +21,14 @@
             width: 100%;
             overflow-y: auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            border: 8px solid gray;
             border-radius: 5px;
-            background-color: lightgrey; /* Changed background color */
+            background-color: midnightblue; /* Changed background color */
         }
 
         .options-label {
             margin-bottom: 10px;
+            color: white;
         }
 
         table {
@@ -38,6 +39,7 @@
         th, td {
             padding: 10px;
             text-align: left;
+            color: white;
         }
 
         th {
@@ -45,28 +47,30 @@
         }
 
         tr:nth-child(odd) {
-            background-color: #f2f2f2; /* Light grey */
+            background-color: deepskyblue; /* Light grey */
         }
 
         tr:nth-child(even) {
-            background-color: #ddd; /* Mid grey */
+            background-color: steelblue; /* Mid grey */
         }
     </style>
 </head>
 <body>
     <div class="options-container" id="optionsContainer">
         <h2 class="options-label">Select Materials for Study Room</h2> <!-- Added label -->
-        <table id="optionsTable">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Room Option</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Room options will be dynamically inserted here -->
-            </tbody>
-        </table>
+        <div style="max-height: 200px; overflow-y: auto;">
+            <table id="optionsTable">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Room Option</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Room options will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
         <button onclick="submitSelection()">Submit Selection</button>
     </div>
     <script>
