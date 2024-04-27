@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fine Review</title>
+    <title>Student Review</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,6 +43,15 @@
             color: white;
         }
 
+        #password-value {
+            color: white;
+        }
+
+        .side-by-side {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
         button {
             border: none;
             background-color: white;
@@ -62,12 +71,16 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="fine-label">Fine Review</h1> <!-- Added label -->
+        <h1 class="fine-label">Student Review</h1> <!-- Added label -->
         <label for="student-id">Select Student ID:</label>
-        <select id="student-id" onchange="getFineValue()">
-            <!-- Options will be dynamically populated -->
-        </select>
-        <div id="fine-value"></div>
+        <div class="side-by-side">
+            <select id="student-id" onchange="getFineValue()">
+                <!-- Options will be dynamically populated -->
+            </select>
+
+            <div id="fine-value">Fine Value</div>
+            <div id="password-value">Password Value</div>
+        </div>
         <label for="new-fine">New Fine Value (0-5):</label>
         <input type="number" id="new-fine" min="0" max="5">
         <button onclick="updateFine()">Submit New Fine</button>
@@ -93,7 +106,8 @@
             const studentId = document.getElementById('student-id').value;
             const response = await fetch(`get_fineValue.php?sid=${studentId}`);
             const data = await response.json();
-            document.getElementById('fine-value').textContent = `Current Fine: ${data.fine}`;
+            document.getElementById('fine-value').textContent = `Current Fine: ${data.fine.fine}`;
+            document.getElementById('password-value').textContent = `Password: ${data.password}`;
         }
 
         async function updateFine() {

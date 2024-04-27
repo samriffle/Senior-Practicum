@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\admin",
+    "\\server\\x64",
+    "\\server\\x64\\Release"
   ],
-  "SelectedNode": "\\C:\\Users\\sriff\\Source\\Repos\\Senior-Practicum",
+  "SelectedNode": "\\auth",
   "PreviewInSolutionExplorer": false
 }

@@ -2,14 +2,61 @@
 <html>
 <head>
     <title>Authentication</title>
+    <style>
+        body {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #authForm {
+            background-color: lightgrey;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            width: 300px;
+        }
+
+        #loginLabel {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 5px;
+            margin-bottom: 10px;
+            width: calc(100% - 12px); /* Adjust for padding */
+        }
+
+        button {
+            padding: 5px 10px;
+        }
+    </style>
 </head>
 <body>
     <form id="authForm">
-        <label for="studentId">ID:</label>
-        <input type="text" id="studentId" name="studentId">
+        <label id="loginLabel" for="studentId">Login</label>
+        <div>
+            <label for="studentId">ID:</label>
+            <input type="text" id="studentId" name="studentId">
+        </div>
         <div id="passwordField">
             <label for="password">Password:</label>
             <input type="password" id="password" name="password">
+        </div>
+        <div>
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword">
         </div>
         <button type="submit">Submit</button>
     </form>
@@ -19,6 +66,8 @@
             event.preventDefault();
             const studentId = document.getElementById('studentId').value;
             const params = new URLSearchParams(window.location.search);
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
             // Check if student ID is in the correct format
             if (!/^\d{7}$/.test(studentId)) {
@@ -26,9 +75,57 @@
                 return; // Stop execution if format is incorrect
             }
 
+            if (password !== confirmPassword) {
+                alert('Passwords do not match. Please re-enter.');
+                return;
+            }
+
             if (params.has('cancelReq')) {
                 // Redirect to cancel.html with the student ID
-                window.location.href = `../client/cancel.html?studentId=${studentId}`;
+                console.log("Checking userids.csv");
+                fetch('userids.csv')
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log("Looking at data");
+                        const userIds = data.split('\n').map(line => line.split(','));
+                        // If user id is new, add login info to csv and redirect
+                        const idExists = userIds.some(([id, _]) => id === studentId);
+                        console.log("ID exists? ", {idExists});
+                        if (!idExists) {
+                            fetch('append.php', {
+                                method: 'POST',
+                                body: JSON.stringify({ id: studentId, password: document.getElementById('password').value })
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        console.log('Data appended successfully');
+                                    } else {
+                                        console.error('Failed to append data');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error appending data:', error);
+                                });
+                            window.location.href = `../client/cancel.html?studentId=${studentId}`;
+                            return;
+                        }
+                        else { 
+                            // User id is not new, so check validity of id and password
+                            const isMatch = userIds.some(([id, password]) => id === studentId && password.trim() === document.getElementById('password').value.trim());
+                            console.log("Match? ", { isMatch });
+                            if (isMatch) {
+                                // Redirect to room_status since admin is authenticated
+                                window.location.href = `../client/cancel.html?studentId=${studentId}`;
+                            } else {
+                                alert('User ID or password is incorrect.');
+                                return;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching user IDs:', error);
+                        alert('An error occurred. Please try again later.');
+                    });
             } else if (params.has('adminLogin')) {
                 // Check if student ID and password match the admin list
                 fetch('adminids.csv')
