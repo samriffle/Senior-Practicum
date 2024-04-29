@@ -46,7 +46,7 @@ if (count($bookedRooms) !== 0) {
 
             // Check if 10 minutes have passed since currentRoundedTimeslot started
             echo "      Key has not been issued for {$room['room']} yet. \n";
-            $currentTimestamp = '15:01:00';//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////date('Y-m-d H:i:s');
+            $currentTimestamp = date('Y-m-d H:i:s');
             $bookingStartTimestamp = $currentDate . ' ' . $room['timeslot'];
             $bookingStartTimestamp = date('Y-m-d H:i:s', strtotime($bookingStartTimestamp));
             $timeDiff = strtotime($currentTimestamp) - strtotime($bookingStartTimestamp);
@@ -348,6 +348,9 @@ foreach ($oldKeys as $oldKey) {
     }
 }
 
+// Close the database connection
+$pdo = null;
+
 // _____________________________________________________________ Notes _____________________________________________________________ //
 
 // Edge cases for issue dates and returns are ignored, especially for those keys that are not return and extended past available hours.
@@ -358,29 +361,5 @@ foreach ($oldKeys as $oldKey) {
 // Multiple bookings may be handled at once by section 1 in the current timeslot. 
 // Multiple tardy key returns may be handled at once by section 2 relating to the previous timeslot.
 
-// Close the database connection
-
-// Log of what I think might be a successful test
-/*
-    Booking Validation Start 2024-04-24,14:16:21
-      1. Reviewing room key for Thorne 130
-          Key has been issued for Thorne 130.
-      2. Reviewing tardy key for room Thorne 130.
-          Fine increased for student 7777777.
-          Already a booking on current timeslot. Cannot reschedule. Removing old
-    info and returning key.
-              Student not removed. Fine amount is not 0.
-              Booking removed successfully.
-      2. Reviewing tardy key for room Thorne 131.
-          Fine increased for student 8888888.
-          Moving over options from old booking to current booking.
-          Removing old info and returning key.
-              Student not removed. Student ID still exists in availabilities.
-              Booking removed successfully.
-          Reissuing key to extended room booking.
-              Key issued successfully for room Thorne 131 at 2024-04-24 14:31:00.
-*/
-
-$pdo = null;
 ?>
 
